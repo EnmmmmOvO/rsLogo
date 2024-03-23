@@ -37,10 +37,6 @@ impl<'a> Draw<'a> {
         self.direction
     }
 
-    pub fn draw(&self) -> bool {
-        self.draw
-    }
-
     pub fn pen_up(&mut self) {
         self.draw = false;
     }

@@ -1,6 +1,6 @@
 use clap::Parser;
 
-use miette::{Diagnostic, miette, Result};
+use miette::{miette, Result};
 use ast::parse_ast;
 use generation::code_generation;
 
@@ -30,11 +30,16 @@ fn main() -> Result<()> {
     let height = args.height;
     let width = args.width;
 
-    let ast = parse_ast(file_path)?;
+    let file = match std::fs::read_to_string(file_path) {
+        Ok(file) => file.lines().map(|x| x.to_string()).collect(),
+        Err(e) => return Err(miette!(e)),
+    };
+
+    let ast = parse_ast(&file)?;
 
     match image_path.extension().map(|s| s.to_str()).flatten() {
         Some("svg") => {
-            let image = code_generation(ast, width, height)?;
+            let image = code_generation(ast, &file, width, height)?;
 
             let res = image.save_svg(&image_path);
             if let Err(e) = res {
@@ -42,7 +47,7 @@ fn main() -> Result<()> {
             }
         }
         Some("png") => {
-            let image = code_generation(ast, width, height)?;
+            let image = code_generation(ast, &file, width, height)?;
 
             let res = image.save_png(&image_path);
             if let Err(e) = res {
@@ -53,8 +58,7 @@ fn main() -> Result<()> {
             println!("Rust file detected");
         }
         _ => {
-            code_generation(ast, width, height)?;
-            // return Err(miette!("File extension not supported"));
+            return Err(miette!("File extension not supported"));
         }
     }
 

@@ -15,6 +15,6 @@ impl Variable {
 	}
 
 	pub fn get(&self, name: &str) -> Option<&Option<f32>> {
-		self.get(name)
+		self.map.get(name)
 	}
 }

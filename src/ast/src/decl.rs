@@ -26,10 +26,8 @@ pub fn parse_decl(input: &str) -> IResult<&str, Decl> {
             },
             Err(_) => break
         }
-
     }
-
-    Ok((temp, Decl { name: Box::new(name), var, stmt_list: Vec::new() }))
+    Ok((temp, Decl { name: Box::new(name), var }))
 }
 
 pub fn parse_decl_name(input: &str) -> IResult<&str, DeclName> {

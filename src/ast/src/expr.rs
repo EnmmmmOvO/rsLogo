@@ -16,16 +16,9 @@ fn parse_num(input: &str) -> IResult<&str, Expr> {
 			space0
 		), space0)(input)?;
 
-	if num.contains('.') {
-		match num.parse::<f32>() {
-			Ok(f) => Ok((temp, Expr::FLOAT(f, temp.len(), input.len() - temp.len()))),
-			Err(_) => Ok((temp, Expr::ERROR("InvalidNum".to_string(), temp.len(), input.len() - temp.len()))),
-		}
-	} else {
-		match num.parse::<i32>() {
-			Ok(i) => Ok((temp, Expr::NUM(i, temp.len(), input.len() - temp.len()))),
-			Err(_) => Ok((temp, Expr::ERROR("InvalidNum".to_string(), temp.len(), input.len() - temp.len()))),
-		}
+	match num.parse::<f32>() {
+		Ok(f) => Ok((temp, Expr::FLOAT(f, temp.len(), input.len() - temp.len()))),
+		Err(_) => Ok((temp, Expr::ERROR("InvalidNum".to_string(), temp.len(), input.len() - temp.len()))),
 	}
 }
 

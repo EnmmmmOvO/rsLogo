@@ -18,7 +18,7 @@ fn parse_if(input: &str) -> IResult<&str, Stmt> {
 	let (temp, expr) = parse_expr(temp).unwrap_or(
 		(temp, Expr::ERROR("MissingOperand".to_string(), temp.len(), 1)
 	));
-	Ok((temp, Stmt::IF(Box::new(expr), vec![], temp.len(), input.len() - temp.len())))
+	Ok((temp, Stmt::IF(Box::new(expr), vec![], 0)))
 }
 
 fn parse_while(input: &str) -> IResult<&str, Stmt> {
@@ -26,7 +26,7 @@ fn parse_while(input: &str) -> IResult<&str, Stmt> {
 	let (temp, expr) = parse_expr(temp).unwrap_or(
 		(temp, Expr::ERROR("MissingOperand".to_string(), temp.len(), 1)
 	));
-	Ok((temp, Stmt::WHILE(Box::new(expr), vec![], temp.len(), input.len() - temp.len())))
+	Ok((temp, Stmt::WHILE(Box::new(expr), vec![], 0)))
 }
 
 fn parse_make(input: &str) -> IResult<&str, Stmt> {
@@ -35,17 +35,17 @@ fn parse_make(input: &str) -> IResult<&str, Stmt> {
 	let (temp, expr) = parse_expr(temp).unwrap_or(
 		(temp, Expr::ERROR("MissingOperand".to_string(), temp.len(), 1)
 	));
-	Ok((temp, Stmt::MAKE(Box::new(assign), Box::new(expr), temp.len(), input.len() - temp.len())))
+	Ok((temp, Stmt::MAKE(Box::new(assign), Box::new(expr), 0)))
 }
 
 fn parse_penup(input: &str) -> IResult<&str, Stmt> {
 	let (temp, _) = delimited(space0, tag("PENUP"), space0)(input)?;
-	Ok((temp, Stmt::PENUP(temp.len(), input.len() - temp.len())))
+	Ok((temp, Stmt::PENUP(0)))
 }
 
 fn parse_pendown(input: &str) -> IResult<&str, Stmt> {
 	let (temp, _) = delimited(space0, tag("PENDOWN"), space0)(input)?;
-	Ok((temp, Stmt::PENDOWN(temp.len(), input.len() - temp.len())))
+	Ok((temp, Stmt::PENDOWN(0)))
 }
 
 fn parse_forward(input: &str) -> IResult<&str, Stmt> {
@@ -53,7 +53,7 @@ fn parse_forward(input: &str) -> IResult<&str, Stmt> {
 	let (temp, expr) = parse_expr(temp).unwrap_or(
 		(temp, Expr::ERROR("MissingOperand".to_string(), temp.len(), 1)
 	));
-	Ok((temp, Stmt::FORWARD(Box::new(expr), temp.len(), input.len() - temp.len())))
+	Ok((temp, Stmt::FORWARD(Box::new(expr), 0)))
 }
 
 fn parse_back(input: &str) -> IResult<&str, Stmt> {
@@ -61,7 +61,7 @@ fn parse_back(input: &str) -> IResult<&str, Stmt> {
 	let (temp, expr) = parse_expr(temp).unwrap_or(
 		(temp, Expr::ERROR("MissingOperand".to_string(), temp.len(), 1)
 	));
-	Ok((temp, Stmt::BACK(Box::new(expr), temp.len(), input.len() - temp.len())))
+	Ok((temp, Stmt::BACK(Box::new(expr), 0)))
 }
 
 fn parse_left(input: &str) -> IResult<&str, Stmt> {
@@ -69,7 +69,7 @@ fn parse_left(input: &str) -> IResult<&str, Stmt> {
 	let (temp, expr) = parse_expr(temp).unwrap_or(
 		(temp, Expr::ERROR("MissingOperand".to_string(), temp.len(), 1)
 	));
-	Ok((temp, Stmt::LEFT(Box::new(expr), temp.len(), input.len() - temp.len())))
+	Ok((temp, Stmt::LEFT(Box::new(expr), 0)))
 }
 
 fn parse_right(input: &str) -> IResult<&str, Stmt> {
@@ -77,7 +77,7 @@ fn parse_right(input: &str) -> IResult<&str, Stmt> {
 	let (temp, expr) = parse_expr(temp).unwrap_or(
 		(temp, Expr::ERROR("MissingOperand".to_string(), temp.len(), 1)
 	));
-	Ok((temp, Stmt::RIGHT(Box::new(expr), temp.len(), input.len() - temp.len())))
+	Ok((temp, Stmt::RIGHT(Box::new(expr), 0)))
 }
 
 fn parse_setpencolor(input: &str) -> IResult<&str, Stmt> {
@@ -85,7 +85,7 @@ fn parse_setpencolor(input: &str) -> IResult<&str, Stmt> {
 	let (temp, expr) = parse_expr(temp).unwrap_or(
 		(temp, Expr::ERROR("MissingOperand".to_string(), temp.len(), 1)
 	));
-	Ok((temp, Stmt::SETPENCOLOR(Box::new(expr), temp.len(), input.len() - temp.len())))
+	Ok((temp, Stmt::SETPENCOLOR(Box::new(expr), 0)))
 }
 
 fn parse_turn(input: &str) -> IResult<&str, Stmt> {
@@ -93,7 +93,7 @@ fn parse_turn(input: &str) -> IResult<&str, Stmt> {
 	let (temp, expr) = parse_expr(temp).unwrap_or(
 		(temp, Expr::ERROR("MissingOperand".to_string(), temp.len(), 1)
 	));
-	Ok((temp, Stmt::TURN(Box::new(expr), temp.len(), input.len() - temp.len())))
+	Ok((temp, Stmt::TURN(Box::new(expr), 0)))
 }
 
 fn parse_setheading(input: &str) -> IResult<&str, Stmt> {
@@ -101,7 +101,7 @@ fn parse_setheading(input: &str) -> IResult<&str, Stmt> {
 	let (temp, expr) = parse_expr(temp).unwrap_or(
 		(temp, Expr::ERROR("MissingOperand".to_string(), temp.len(), 1)
 	));
-	Ok((temp, Stmt::SETHEADING(Box::new(expr), temp.len(), input.len() - temp.len())))
+	Ok((temp, Stmt::SETHEADING(Box::new(expr), 0)))
 }
 
 fn parse_setx(input: &str) -> IResult<&str, Stmt> {
@@ -109,7 +109,7 @@ fn parse_setx(input: &str) -> IResult<&str, Stmt> {
 	let (temp, expr) = parse_expr(temp).unwrap_or(
 		(temp, Expr::ERROR("MissingOperand".to_string(), temp.len(), 1)
 	));
-	Ok((temp, Stmt::SETX(Box::new(expr), temp.len(), input.len() - temp.len())))
+	Ok((temp, Stmt::SETX(Box::new(expr), 0)))
 }
 
 fn parse_sety(input: &str) -> IResult<&str, Stmt> {
@@ -117,7 +117,7 @@ fn parse_sety(input: &str) -> IResult<&str, Stmt> {
 	let (temp, expr) = parse_expr(temp).unwrap_or(
 		(temp, Expr::ERROR("MissingOperand".to_string(), temp.len(), 1)
 	));
-	Ok((temp, Stmt::SETY(Box::new(expr), temp.len(), input.len() - temp.len())))
+	Ok((temp, Stmt::SETY(Box::new(expr), 0)))
 }
 
 fn parse_addassign(input: &str) -> IResult<&str, Stmt> {
@@ -126,7 +126,7 @@ fn parse_addassign(input: &str) -> IResult<&str, Stmt> {
 	let (temp, expr) = parse_expr(temp).unwrap_or(
 		(temp, Expr::ERROR("MissingOperand".to_string(), temp.len(), 1)
 	));
-	Ok((temp, Stmt::ADDASSIGN(Box::new(assign), Box::new(expr), temp.len(), input.len() - temp.len())))
+	Ok((temp, Stmt::ADDASSIGN(Box::new(assign), Box::new(expr),0)))
 }
 
 fn parse_func(input: &str) -> IResult<&str, Stmt> {
@@ -142,7 +142,7 @@ fn parse_func(input: &str) -> IResult<&str, Stmt> {
 		}
 	}
 
-	Ok((temp, Stmt::FUNC(Box::new(func_name), var, temp.len(), input.len() - temp.len())))
+	Ok((temp, Stmt::FUNC(Box::new(func_name), var, 0)))
 }
 
 pub fn parse_stmt(input: &str) -> IResult<&str, Stmt> {

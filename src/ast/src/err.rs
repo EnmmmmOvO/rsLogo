@@ -17,10 +17,10 @@ pub enum ASTError<'a> {
         help: &'a str,
         error: String,
     },
-    UnInvalidNumber {
+    InvalidNumber {
         #[source_code]
         src: String,
-        #[label("Could not convert to integer or float")]
+        #[label("Could not convert to float")]
         bad_bit: SourceSpan,
         help: &'a str,
         error: String,
@@ -105,6 +105,22 @@ pub enum ASTError<'a> {
         help: &'a str,
         error: String,
     },
+    DeclWrongPosition {
+        #[source_code]
+        src: String,
+        #[label("Function declaration cannot be placed inside the `IF` or `WHILE` statement")]
+        bad_bit: SourceSpan,
+        help: &'a str,
+        error: String,
+    },
+    RepeatFunctionName {
+        #[source_code]
+        src: String,
+        #[label("Function name already exists")]
+        bad_bit: SourceSpan,
+        help: &'a str,
+        error: String,
+    },
 }
 
 pub fn match_err<'a>(src: String, line: usize, err: String, end: usize, len: usize) -> ASTError<'a> {
@@ -116,17 +132,17 @@ pub fn match_err<'a>(src: String, line: usize, err: String, end: usize, len: usi
             help: "Check the format of each command and remove redundant operand",
             error: format!("Unexpected extra operands (Ln {line}, Col {})", start + 1),
         },
-        "InvalidNum" => ASTError::UnInvalidNumber {
+        "InvalidNum" => ASTError::InvalidNumber {
             src,
             bad_bit: (start, len).into(),
-            help: "Try using a valid number or float",
+            help: "Try using a valid number",
             error: format!("Invalid number (Ln {line}, Col {})", start + 1),
         },
         "UnexpectedExpr" => ASTError::UnexpectedExpr {
             src,
             bad_bit: (start, len).into(),
             help: "If it is a variable, the format is `:{ variable_name }`. \nIf it is a number, \
-            the format is `\"{ number | float }`. \nIf it is a system variable, only `XCOR`, \
+            the format is `\"{ number }`. \nIf it is a system variable, only `XCOR`, \
             `YCOR`, `COLOR`, `HEADING` are allowed.",
             error: format!("Unexpected Expression (Ln {line}, Col {})", start + 1),
         },
@@ -183,6 +199,18 @@ pub fn match_err<'a>(src: String, line: usize, err: String, end: usize, len: usi
             bad_bit: (start, len).into(),
             help: "Add `IF` or `WHILE` to start the condition declaration.",
             error: format!("Missing `IF` or `WHILE` (Ln {line}, Col {})", start + 1),
+        },
+        "DeclWrongPosition" => ASTError::DeclWrongPosition {
+            src,
+            bad_bit: (start, len).into(),
+            help: "Move the function declaration outside the `IF` or `WHILE` statement.",
+            error: format!("Wrong Position of Function Declaration (Ln {line}, Col {})", start + 1),
+        },
+        "RepeatFunctionName" => ASTError::RepeatFunctionName {
+            src,
+            bad_bit: (start, len).into(),
+            help: "Change the function name to a unique name.",
+            error: format!("Repeat Function Name (Ln {line}, Col {})", start + 1),
         },
         _ => unreachable!(),
     }

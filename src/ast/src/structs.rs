@@ -1,6 +1,7 @@
+use std::collections::HashMap;
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expr {
-	NUM(i32, usize, usize),
 	FLOAT(f32, usize, usize),
 	VAR(String, usize, usize),
 	ADD(Box<Expr>, Box<Expr>, usize, usize),
@@ -22,30 +23,29 @@ pub enum Expr {
 
 #[derive(Debug, PartialEq)]
 pub enum Stmt {
-	IF(Box<Expr>, Vec<Stmt>, usize, usize),
-	WHILE(Box<Expr>, Vec<Stmt>, usize, usize),
-	MAKE(Box<Assign>, Box<Expr>, usize, usize),
-	PENUP(usize, usize),
-	PENDOWN(usize, usize),
-	FORWARD(Box<Expr>, usize, usize),
-	BACK(Box<Expr>, usize, usize),
-	LEFT(Box<Expr>, usize, usize),
-	RIGHT(Box<Expr>, usize, usize),
-	SETPENCOLOR(Box<Expr>, usize, usize),
-	TURN(Box<Expr>, usize, usize),
-	SETHEADING(Box<Expr>, usize, usize),
-	SETX(Box<Expr>, usize, usize),
-	SETY(Box<Expr>, usize, usize),
-	ADDASSIGN(Box<Assign>, Box<Expr>, usize, usize),
-	FUNC(Box<DeclName>, Vec<Box<Expr>>, usize, usize),
-	COMMENT(String),
+	IF(Box<Expr>, Vec<Stmt>, usize),
+	WHILE(Box<Expr>, Vec<Stmt>, usize),
+	MAKE(Box<Assign>, Box<Expr>, usize),
+	PENUP(usize),
+	PENDOWN(usize),
+	FORWARD(Box<Expr>, usize),
+	BACK(Box<Expr>, usize),
+	LEFT(Box<Expr>, usize),
+	RIGHT(Box<Expr>, usize),
+	SETPENCOLOR(Box<Expr>, usize),
+	TURN(Box<Expr>, usize),
+	SETHEADING(Box<Expr>, usize),
+	SETX(Box<Expr>, usize),
+	SETY(Box<Expr>, usize),
+	ADDASSIGN(Box<Assign>, Box<Expr>, usize),
+	FUNC(Box<DeclName>, Vec<Box<Expr>>, usize),
+	COMMENT(String, usize),
 }
 
 #[derive(Debug, PartialEq)]
 pub struct Decl {
 	pub name: Box<DeclName>,
-	pub var: Vec<Box<Assign>>,
-	pub stmt_list: Vec<Stmt>,
+	pub var: Vec<Box<Assign>>
 }
 
 #[derive(Debug, PartialEq)]
@@ -58,4 +58,50 @@ pub enum Assign {
 pub enum DeclName {
 	STRING(String, usize, usize),
 	ERROR(String, usize, usize),
+}
+
+#[derive(Debug, PartialEq)]
+pub struct FunctionType {
+	pub args: Vec<Box<Assign>>,
+	pub stmt_list: Vec<Stmt>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Function {
+	map: HashMap<String, FunctionType>,
+}
+
+impl Function {
+	pub fn new() -> Self {
+		Function { map: HashMap::new() }
+	}
+
+	pub fn check_name(&self, name: &str) -> bool {
+		self.map.contains_key(name)
+	}
+
+	pub fn insert(&mut self, name: String, args: Vec<Box<Assign>>, stmt_list: Vec<Stmt>) {
+		self.map.insert(name, FunctionType { args, stmt_list });
+	}
+
+	pub fn get(&self, name: &str) -> Option<&FunctionType> {
+		self.map.get(name)
+	}
+
+	pub fn get_main(&self) -> &Vec<Stmt> {
+		self.map.get("").unwrap().stmt_list.as_ref()
+	}
+
+	pub fn get_args(&self) -> Vec<String> {
+		let mut list = vec![];
+		for arg in self.map.values() {
+			for a in arg.args.iter() {
+				if let Assign::VAR(name, ..) = a.as_ref() {
+					list.push(name.to_string());
+				}
+			}
+		}
+		list
+	}
+
 }
