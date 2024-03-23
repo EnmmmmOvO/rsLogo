@@ -6,7 +6,7 @@ mod decl;
 mod stmt;
 mod expr;
 mod assign;
-pub mod err;
+mod err;
 mod support;
 
 use structs::{Stmt, Decl};
@@ -22,7 +22,7 @@ fn parse_file(path: PathBuf) -> Vec<String> {
     file.lines().map(|x| x.to_string()).collect()
 }
 
-pub fn parse_stmt_list(path: PathBuf) -> Result<Vec<Decl>, ASTError<'static>> {
+pub fn parse_ast(path: PathBuf) -> Result<Vec<Decl>, ASTError<'static>> {
     let mut result: Vec<Decl> = Vec::new();
 
     let mut record: VecDeque<Stmt> = VecDeque::new();

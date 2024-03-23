@@ -1,12 +1,12 @@
 [package]
-name = "ast"
+name = "generation"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-nom = "7.1.3"
 miette = { version = "7.2.0", features = ["fancy"] }
 thiserror = "1.0.58"
-regex = "1.10.3"
+ast = { path = "../ast" }
+unsvg = "1.1.2"

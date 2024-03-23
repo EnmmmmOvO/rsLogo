@@ -1,11 +1,8 @@
 use clap::Parser;
-use unsvg::Image;
-use draw::Draw;
-
-pub mod draw;
 
 use miette::{Diagnostic, miette, Result};
-use ast::parse_stmt_list;
+use ast::parse_ast;
+use generation::code_generation;
 
 
 /// A simple program to parse four arguments using clap.
@@ -33,25 +30,27 @@ fn main() -> Result<()> {
     let height = args.height;
     let width = args.width;
 
-    let mut image = Image::new(width, height);
-    // let mut pen = Draw::new(width as f32, height as f32, &mut image);
-
-    let file = file_path;
-
-    println!("{:?}", parse_stmt_list(file)?);
+    let ast = parse_ast(file_path)?;
 
     match image_path.extension().map(|s| s.to_str()).flatten() {
         Some("svg") => {
+            let image = code_generation(ast, width, height)?;
+
             let res = image.save_svg(&image_path);
             if let Err(e) = res {
                 return Err(miette!("Error saving svg: {e}"));
             }
         }
         Some("png") => {
+            let image = code_generation(ast, width, height)?;
+
             let res = image.save_png(&image_path);
             if let Err(e) = res {
                 return Err(miette!("Error saving png: {e}"));
             }
+        }
+        Some("rs") => {
+            println!("Rust file detected");
         }
         _ => {
             return Err(miette!("File extension not supported"));

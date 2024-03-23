@@ -1,4 +1,4 @@
-workspace = { members = ["src/ast"] }
+workspace = { members = [ "src/ast", "src/generation", "src/transpiler" ] }
 [package]
 name = "rslogo"
 version = "0.1.0"
@@ -8,6 +8,8 @@ edition = "2021"
 
 [dependencies]
 ast = { path = "src/ast" }
-clap = { version = "4.4.4", features = ["derive"] }
+generation = { path = "src/generation" }
 unsvg = "1.1.1"
+clap = { version = "4.4.4", features = ["derive"] }
 miette = { version = "7.2.0", features = ["fancy"] }
+

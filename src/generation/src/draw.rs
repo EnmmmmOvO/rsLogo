@@ -93,7 +93,3 @@ impl<'a> Draw<'a> {
     }
 }
 
-#[cfg(test)]
-mod tests {
-
-}

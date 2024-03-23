@@ -4,7 +4,10 @@ use crate::structs::{Assign, Decl, DeclName, Expr, Stmt};
 
 #[derive(Error, Debug, Diagnostic)]
 #[error("{error}")]
-#[diagnostic(help("{help}"))]
+#[diagnostic(
+    code("Compile Error"),
+    help("{help}")
+)]
 pub enum ASTError<'a> {
     UnexpectedExtraOperand {
         #[source_code]
