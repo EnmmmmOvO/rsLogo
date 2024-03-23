@@ -1,9 +1,12 @@
 use clap::Parser;
 use unsvg::Image;
-use draw::pen;
+use draw::Draw;
 
 pub mod draw;
-mod compiler;
+
+use miette::{Diagnostic, miette, Result};
+use ast::parse_stmt_list;
+
 
 /// A simple program to parse four arguments using clap.
 #[derive(Parser)]
@@ -21,7 +24,7 @@ struct Args {
     width: u32,
 }
 
-fn main() -> Result<(), ()> {
+fn main() -> Result<()> {
     let args: Args = Args::parse();
 
     // Access the parsed arguments
@@ -31,27 +34,27 @@ fn main() -> Result<(), ()> {
     let width = args.width;
 
     let mut image = Image::new(width, height);
-    let mut pen = pen::new(width as f32, height as f32, &mut image);
+    // let mut pen = Draw::new(width as f32, height as f32, &mut image);
 
+    let file = file_path;
+
+    println!("{:?}", parse_stmt_list(file)?);
 
     match image_path.extension().map(|s| s.to_str()).flatten() {
         Some("svg") => {
             let res = image.save_svg(&image_path);
             if let Err(e) = res {
-                eprintln!("Error saving svg: {e}");
-                return Err(());
+                return Err(miette!("Error saving svg: {e}"));
             }
         }
         Some("png") => {
             let res = image.save_png(&image_path);
             if let Err(e) = res {
-                eprintln!("Error saving png: {e}");
-                return Err(());
+                return Err(miette!("Error saving png: {e}"));
             }
         }
         _ => {
-            eprintln!("File extension not supported");
-            return Err(());
+            return Err(miette!("File extension not supported"));
         }
     }
 
