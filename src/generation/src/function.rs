@@ -1,39 +1,33 @@
 use std::collections::HashMap;
-use ast::structs::Stmt;
+use ast::structs::{Assign, Expr, Stmt};
 
-struct FunctionType {
-	var: String,
+
+#[derive(Debug, PartialEq)]
+pub struct FunctionType {
+	args: Vec<Box<Assign>>,
 	stmt_list: Vec<Stmt>,
 }
 
-struct Function {
-	functions_map: HashMap<String, FunctionType>,
+#[derive(Debug, PartialEq)]
+pub(crate) struct Function {
+	map: HashMap<String, FunctionType>,
 }
 
 impl Function {
 	pub fn new() -> Self {
-		Function {
-			functions_map: HashMap::new(),
-		}
+		Function { map: HashMap::new(),  }
 	}
 
-	pub fn insert(&mut self, name: String, var: String, stmt_list: Vec<Stmt>) -> bool {
-		if self.functions_map.contains_key(&name) {
+	pub fn insert(&mut self, name: String, args: Vec<Box<Assign>>, stmt_list: Vec<Stmt>) -> bool {
+		if self.map.contains_key(&name) {
 			return false;
 		} else {
-			self.functions_map.insert(name, FunctionType {
-				var,
-				stmt_list,
-			});
+			self.map.insert(name, FunctionType { args, stmt_list });
 			return true;
 		}
 	}
 
-	pub fn get_stmt_list(&self, name: &str) -> Option<&FunctionType> {
-		self.functions_map.get(name)
-	}
-
-	pub fn get_mut(&mut self, name: &str) -> Option<&mut FunctionType> {
-		self.functions_map.get_mut(name)
+	pub fn get(&self, name: &str) -> Option<&FunctionType> {
+		self.map.get(name)
 	}
 }

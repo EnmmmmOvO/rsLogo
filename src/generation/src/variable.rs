@@ -1,36 +1,20 @@
 use std::collections::HashMap;
 
-pub enum VariableType {
-	Float(f32),
-	Int(i32),
-	Var(String),
-}
-
+#[derive(Debug, PartialEq)]
 pub struct Variable {
-	map: HashMap<String, VariableType>,
+	map: HashMap<String, Option<f32>>,
 }
 
 impl Variable {
 	pub fn new() -> Self {
-		Variable {
-			map: HashMap::new(),
-		}
+		Variable { map: HashMap::new(), }
 	}
 
-	pub fn insert(&mut self, name: String, var: VariableType) -> bool {
-		if self.map.contains_key(&name) {
-			return false;
-		} else {
-			self.map.insert(name, var);
-			return true;
-		}
+	pub fn insert(&mut self, name: String, var: Option<f32>) {
+		self.map.insert(name, var);
 	}
 
-	pub fn get(&self, name: &str) -> Option<&VariableType> {
-		self.map.get(name)
-	}
-
-	pub fn get_mut(&mut self, name: &str) -> Option<&mut VariableType> {
-		self.map.get_mut(name)
+	pub fn get(&self, name: &str) -> Option<&Option<f32>> {
+		self.get(name)
 	}
 }

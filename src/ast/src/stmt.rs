@@ -130,14 +130,19 @@ fn parse_addassign(input: &str) -> IResult<&str, Stmt> {
 }
 
 fn parse_func(input: &str) -> IResult<&str, Stmt> {
-	let (temp, func_name) = parse_decl_name(input)?;
-	let (temp, stmts) = parse_expr(temp)?;
-	Ok((temp, Stmt::FUNC1(Box::new(func_name), Box::new(stmts), temp.len(), input.len() - temp.len())))
-}
+	let (mut temp, func_name) = parse_decl_name(input)?;
+	let mut var = vec![];
+	loop {
+		match parse_expr(temp) {
+			Ok((str, expr)) => {
+				var.push(Box::new(expr));
+				temp = str;
+			},
+			Err(_) => break
+		}
+	}
 
-fn parse_func_without_input(input: &str) -> IResult<&str, Stmt> {
-	let (temp, func_name) = parse_decl_name(input)?;
-	Ok((temp, Stmt::FUNC0(Box::new(func_name), temp.len(), input.len() - temp.len())))
+	Ok((temp, Stmt::FUNC(Box::new(func_name), var, temp.len(), input.len() - temp.len())))
 }
 
 pub fn parse_stmt(input: &str) -> IResult<&str, Stmt> {
@@ -158,6 +163,5 @@ pub fn parse_stmt(input: &str) -> IResult<&str, Stmt> {
 		parse_sety,
 		parse_addassign,
 		parse_func,
-		parse_func_without_input
 	))(input)
 }

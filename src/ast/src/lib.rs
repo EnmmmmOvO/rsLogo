@@ -13,8 +13,8 @@ use structs::{Stmt, Decl};
 use stmt::parse_stmt;
 use decl::parse_decl;
 use err::ASTError;
-use crate::err::{check_decl_err, check_stmt_err, match_err};
-use crate::structs::DeclName;
+use err::{check_decl_err, check_stmt_err, match_err};
+use structs::{DeclName, Expr};
 
 
 fn parse_file(path: PathBuf) -> Vec<String> {

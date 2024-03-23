@@ -37,8 +37,7 @@ pub enum Stmt {
 	SETX(Box<Expr>, usize, usize),
 	SETY(Box<Expr>, usize, usize),
 	ADDASSIGN(Box<Assign>, Box<Expr>, usize, usize),
-	FUNC1(Box<DeclName>, Box<Expr>, usize, usize),
-	FUNC0(Box<DeclName>, usize, usize),
+	FUNC(Box<DeclName>, Vec<Box<Expr>>, usize, usize),
 	COMMENT(String),
 }
 

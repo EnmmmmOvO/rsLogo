@@ -229,13 +229,16 @@ pub fn check_stmt_err(input: &Stmt) -> Option<(String, usize, usize)> {
         Stmt::SETHEADING(expr, ..) |
         Stmt::SETX(expr, ..) |
         Stmt::SETY(expr, ..) => check_expr_err(expr.as_ref()),
-        Stmt::FUNC1(name, assign, ..) => {
+        Stmt::FUNC(name, assign, ..) => {
             if let Some(temp) = check_decl_name_err(name.as_ref()) {
                 return Some(temp);
             }
-            check_expr_err(assign.as_ref())
+
+            for var in assign.iter() {
+                return check_expr_err(var.as_ref());
+            }
+            None
         },
-        Stmt::FUNC0(name, ..) => check_decl_name_err(name.as_ref()),
         _ => None,
     }
 }
