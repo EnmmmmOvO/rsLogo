@@ -53,7 +53,8 @@ fn main() -> Result<()> {
             println!("Rust file detected");
         }
         _ => {
-            return Err(miette!("File extension not supported"));
+            code_generation(ast, width, height)?;
+            // return Err(miette!("File extension not supported"));
         }
     }
 

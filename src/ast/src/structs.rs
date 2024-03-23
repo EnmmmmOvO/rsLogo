@@ -43,9 +43,10 @@ pub enum Stmt {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Decl {
-	FUNC1(Box<DeclName>, Box<Assign>, Vec<Stmt>),
-	FUNC0(Box<DeclName>, Vec<Stmt>),
+pub struct Decl {
+	pub name: Box<DeclName>,
+	pub var: Vec<Box<Assign>>,
+	pub stmt_list: Vec<Stmt>,
 }
 
 #[derive(Debug, PartialEq)]

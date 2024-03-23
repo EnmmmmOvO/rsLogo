@@ -189,15 +189,17 @@ pub fn match_err<'a>(src: String, line: usize, err: String, end: usize, len: usi
 }
 
 pub fn check_decl_err(input: &Decl) -> Option<(String, usize, usize)> {
-    match input {
-        Decl::FUNC1(name, expr, _) => {
-            if let Some(temp) = check_decl_name_err(name.as_ref()) {
-                return Some(temp);
-            }
-            check_assign_err(expr.as_ref())
-        },
-        Decl::FUNC0(name, _) => check_decl_name_err(name.as_ref()),
+    match &*input.name {
+        DeclName::ERROR(s, end, len) => return Some((s.to_string(), *end, *len)),
+        _ => {},
     }
+
+    for var in input.var.iter() {
+        if let Assign::ERROR(s, end, len) = var.as_ref() {
+            return Some((s.to_string(), *end, *len));
+        }
+    }
+    None
 }
 
 pub fn check_decl_name_err(input: &DeclName) -> Option<(String, usize, usize)> {
