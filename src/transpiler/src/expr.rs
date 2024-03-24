@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::HashMap;
 use ast::structs::Expr;
 use crate::err::{match_err, TranspilerError};
 use crate::file::DrawMethod;
@@ -12,10 +12,11 @@ pub fn transpiler_expr<'a>(
 	expr: &Expr,
 	line: usize,
 	sentence: &str,
-	variable: &HashSet<String>,
+	variable: &HashMap<String, bool>,
 	method: &mut DrawMethod
 ) -> Result<Value, TranspilerError<'a>> {
 	match expr {
+		Expr::BOOLEAN(bool, ..) => Ok(Value::B(bool.to_string())),
 		Expr::FLOAT(num, ..) => {
 			let temp = num.to_string();
 			if temp.contains(".") {
@@ -25,16 +26,18 @@ pub fn transpiler_expr<'a>(
 			}
 		},
 		Expr::VAR(var, end, len) => {
-			if variable.contains(var) {
-				Ok(Value::F(var.to_string()))
-			} else {
-				Err(match_err(
-					sentence.to_string(),
-					line,
-					"UnDefinedVariable".to_string(),
-					*end,
-					*len
-				))
+			match variable.get(var) {
+				Some(true) => Ok(Value::B(var.to_string())),
+				Some(false) => Ok(Value::F(var.to_string())),
+				None => {
+					Err(match_err(
+						sentence.to_string(),
+						line,
+						"UnDefinedVariable".to_string(),
+						*end,
+						*len
+					))
+				}
 			}
 		},
 		Expr::ADD(expr1, expr2, ..) => {
@@ -358,8 +361,8 @@ pub fn get_end_len(expr: &Expr) -> (usize, usize) {
 		Expr::HEADING(end, len) | Expr::COLOR(end, len) |
 		Expr::EQ(.., end, len) | Expr::NE(.., end, len) |
 		Expr::LT(.., end, len) | Expr::GT(.., end, len) |
-		Expr::AND(.., end, len) | Expr::OR(.., end, len) =>
-			(*end, *len),
+		Expr::AND(.., end, len) | Expr::OR(.., end, len) |
+		Expr::BOOLEAN(.., end, len) => (*end, *len),
 		_ => unreachable!()
 	}
 }

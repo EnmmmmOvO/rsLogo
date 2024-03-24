@@ -16,7 +16,7 @@ pub fn code_generation(ast: Function, file: &Vec<String>, width: u32, height: u3
 	let mut draw = Draw::new(width as f32, height as f32, &mut image);
 	let mut variable = Variable::new();
 
-	ast.get_args().iter().for_each(|arg| { variable.insert(arg.to_string(), None) });
+	ast.get_args().iter().for_each(|arg| { variable.insert_num(arg.to_string(), None) });
 	process_stmt(ast.get_main(), &mut variable, &mut draw, &ast, file)?;
 
 	Ok(image)

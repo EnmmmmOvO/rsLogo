@@ -1,7 +1,7 @@
 use ast::structs::Expr;
 use crate::draw::Draw;
 use crate::err::{GenerationError, match_err};
-use crate::variable::Variable;
+use crate::variable::{Type, Variable};
 
 #[derive(Debug, PartialEq)]
 pub enum Value {
@@ -11,10 +11,12 @@ pub enum Value {
 
 pub fn process_expr(expr: &Expr, variable: &Variable, line: usize, sentence: &str, draw: &Draw) -> Result<Value, GenerationError<'static>> {
 	match expr {
+		Expr::BOOLEAN(bool,..) => Ok(Value::B(*bool)),
 		Expr::FLOAT(num,..) => Ok(Value::F(*num)),
 		Expr::VAR(var,..) =>
 			match variable.get(var) {
-				Some(Some(num)) => Ok(Value::F(*num)),
+				Some(Some(Type::F(num))) => Ok(Value::F(*num)),
+				Some(Some(Type::B(bool))) => Ok(Value::B(*bool)),
 				Some(None) => Ok(Value::F(0.0)),
 				None => Ok(Value::F(0.0)),
 			}
@@ -266,8 +268,8 @@ pub fn get_end_len(expr: &Expr) -> (usize, usize) {
 		Expr::HEADING(end, len) | Expr::COLOR(end, len) |
 		Expr::EQ(.., end, len) | Expr::NE(.., end, len) |
 		Expr::LT(.., end, len) | Expr::GT(.., end, len) |
-		Expr::AND(.., end, len) | Expr::OR(.., end, len) =>
-			(*end, *len),
+		Expr::AND(.., end, len) | Expr::OR(.., end, len) |
+		Expr::BOOLEAN(.., end, len) => (*end, *len),
 		_ => unreachable!()
 	}
 }

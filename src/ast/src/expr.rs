@@ -8,6 +8,16 @@ use nom::{
 use crate::structs::Expr;
 use crate::support::check_name;
 
+fn parse_true(input: &str) -> IResult<&str, Expr> {
+	let (temp, _) = delimited(space0, tag("\"TRUE"), space0)(input)?;
+	Ok((temp, Expr::BOOLEAN(true, temp.len(), input.len() - temp.len())))
+}
+
+fn parse_false(input: &str) -> IResult<&str, Expr> {
+	let (temp, _) = delimited(space0, tag("\"FALSE"), space0)(input)?;
+	Ok((temp, Expr::BOOLEAN(false, temp.len(), input.len() - temp.len())))
+}
+
 fn parse_num(input: &str) -> IResult<&str, Expr> {
 	let (temp, num) = delimited(
 		space0, delimited(
@@ -169,6 +179,8 @@ fn parts_err(input: &str) -> IResult<&str, Expr> {
 
 pub fn parse_expr(input: &str) -> IResult<&str, Expr> {
 	alt((
+		parse_true,
+		parse_false,
 		parse_num,
 		parse_var,
 		parse_add,

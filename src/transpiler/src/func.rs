@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::HashMap;
 use ast::structs::{Function, Stmt};
 use crate::err::TranspilerError;
 use ast::structs::Assign;
@@ -16,7 +16,7 @@ pub fn transpile_func<'a>(
 	if name == "" {
 		Ok(format!(
 			"pub fn process_svg(draw: &mut Draw) -> Result<()> {{\n{}\tOk(())\n}}\n",
-			transpiler_stmt(stmt_list, file, method, &mut HashSet::new(), 1, ast)?
+			transpiler_stmt(stmt_list, file, method, &mut HashMap::new(), 1, ast)?
 		))
 	} else {
 		let args: Vec<String> = args.iter().map(|x|

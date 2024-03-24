@@ -57,12 +57,9 @@ fn main() -> Result<()> {
             }
         }
         None => {
-            fs::remove_dir_all(&image_path).unwrap_or_default();
-
             if image_path.is_dir() || image_path.display().to_string().contains("/") {
                 return Err(miette!("Rust transpiler does not support directories"));
             }
-
             transpiler_rust(&image_path, ast, &file, width, height)?
         },
         _ => return Err(miette!("File extension not supported"))

@@ -3,7 +3,7 @@ use ast::structs::{Assign, DeclName, Function, Stmt};
 use crate::draw::Draw;
 use crate::err::{GenerationError, match_err};
 use crate::expr::{get_end_len, process_expr, Value};
-use crate::variable::Variable;
+use crate::variable::{Type, Variable};
 
 pub fn process_stmt(
 	stmt_list: &Vec<Stmt>,
@@ -50,19 +50,14 @@ pub fn process_stmt(
 			},
 			Stmt::MAKE(assign, expr, line) => {
 				match process_expr(expr.as_ref(), variable, *line, &file[*line], draw)? {
-					Value::B(_) => {
-						let (end, len) = get_end_len(expr.as_ref());
-						return Err(match_err(
-							file[*line].to_string(),
-							*line,
-							"UnexpectedNumberType".to_string(),
-							end,
-							len
-						))
+					Value::B(bool) => {
+						if let Assign::VAR(name, ..) = assign.as_ref() {
+							variable.insert_bool(name.to_string(), Some(bool));
+						}
 					},
 					Value::F(num) => {
 						if let Assign::VAR(name, ..) = assign.as_ref() {
-							variable.insert(name.to_string(), Some(num));
+							variable.insert_num(name.to_string(), Some(num));
 						}
 					},
 				}
@@ -71,7 +66,14 @@ pub fn process_stmt(
 				let org = match assign.as_ref() {
 					Assign::VAR(name, end, len) => {
 						match variable.get(name) {
-							Some(Some(num)) => num,
+							Some(Some(Type::F(num))) => num,
+							Some(Some(Type::B(_))) => Err(match_err(
+								file[*line].to_string(),
+								*line,
+								"UnexpectedBooleanType".to_string(),
+								*end,
+								*len
+							))?,
 							Some(None) => Err(match_err(
 								file[*line].to_string(),
 								*line,
@@ -104,7 +106,7 @@ pub fn process_stmt(
 					},
 					Value::F(num) => {
 						if let Assign::VAR(name, ..) = assign.as_ref() {
-							variable.insert(name.to_string(), Some(num + org));
+							variable.insert_num(name.to_string(), Some(num + org));
 						}
 					},
 				}
@@ -335,16 +337,14 @@ pub fn process_stmt(
 					match process_expr(value.as_ref(), variable, *line, &file[*line], draw)? {
 						Value::F(num) => {
 							if let Assign::VAR(name, ..) = arg.as_ref() {
-								variable.insert(name.to_string(), Some(num));
+								variable.insert_num(name.to_string(), Some(num));
 							}
 						},
-						_ => return Err(match_err(
-							file[*line].to_string(),
-							*line,
-							"UnexpectedNumberType".to_string(),
-							*end,
-							*len
-						))
+						Value::B(bool) => {
+							if let Assign::VAR(name, ..) = arg.as_ref() {
+								variable.insert_bool(name.to_string(), Some(bool));
+							}
+						},
 					}
 				}
 

@@ -1,7 +1,8 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expr {
+	BOOLEAN(bool, usize, usize),
 	FLOAT(f32, usize, usize),
 	VAR(String, usize, usize),
 	ADD(Box<Expr>, Box<Expr>, usize, usize),
@@ -99,11 +100,11 @@ impl Function {
 		}
 	}
 
-	pub fn get_args_by_name(&self, name: &str) -> HashSet<String> {
-		let mut set = HashSet::new();
+	pub fn get_args_by_name(&self, name: &str) -> HashMap<String, bool> {
+		let mut set = HashMap::new();
 		self.map.get(name).unwrap().args.iter().for_each(|x| {
 			if let Assign::VAR(name, ..) = x.as_ref() {
-				set.insert(name.to_string());
+				set.insert(name.to_string(), false);
 			}
 		});
 		set

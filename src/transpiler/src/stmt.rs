@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::HashMap;
 use ast::structs::{Assign, DeclName, Function, Stmt};
 use crate::err::{match_err, TranspilerError};
 use crate::expr::{get_end_len, transpiler_expr, Value};
@@ -8,7 +8,7 @@ pub fn transpiler_stmt<'a>(
 	stmt_list: &Vec<Stmt>,
 	file: &Vec<String>,
 	method: &mut DrawMethod,
-	variable: &mut HashSet<String>,
+	variable: &mut HashMap<String, bool>,
 	tab: i32,
 	ast: &Function,
 ) -> Result<String, TranspilerError<'a>> {
@@ -72,28 +72,28 @@ pub fn transpiler_stmt<'a>(
 					_ => unreachable!()
 				};
 
-				let value = match transpiler_expr(
+				match transpiler_expr(
 					expr, *line, &file[*line], &variable, method
 				)? {
-					Value::F(num) => num,
-					_ => {
-						let (end, len) = get_end_len(expr);
-						Err(match_err(
-							file[*line].to_string(),
-							*line,
-							"UnexpectedNumberType".to_string(),
-							end,
-							len
-						))?
-					}
+					Value::F(num) => {
+						match variable.get(name) {
+							Some(true) | None => {
+								result.push(format!("{}let mut {} = {};\n", set_tab(tab), name, num));
+								variable.insert(name.to_string(), false);
+							}
+							_ => result.push(format!("{}{} = {};\n", set_tab(tab), name, num))
+						}
+					},
+					Value::B(bool) => {
+						match variable.get(name) {
+							Some(false) | None => {
+								result.push(format!("{}let mut {} = {};\n", set_tab(tab), name, bool));
+								variable.insert(name.to_string(), true);
+							}
+							_ => result.push(format!("{}{} = {};\n", set_tab(tab), name, bool))
+						}
+					},
 				};
-
-				if variable.contains(name) {
-					result.push(format!("{}{} = {};\n", set_tab(tab), name, value));
-				} else {
-					result.push(format!("{}let mut {} = {};\n", set_tab(tab), name, value));
-					variable.insert(name.to_string());
-				}
 			},
 			Stmt::ADDASSIGN(assign, expr, line) => {
 				let name = match &*assign.as_ref() {
@@ -117,17 +117,28 @@ pub fn transpiler_stmt<'a>(
 					}
 				};
 
-				if variable.contains(name) {
-					result.push(format!("{}{} += {};\n", set_tab(tab), name, value));
-				} else {
-					let (end, len) = get_end_len(expr);
-					Err(match_err(
-						file[*line].to_string(),
-						*line,
-						"UnDefinedVariable".to_string(),
-						end,
-						len
-					))?
+				match variable.get(name) {
+					Some(true) => {
+						let (end, len) = get_end_len(expr);
+						Err(match_err(
+							file[*line].to_string(),
+							*line,
+							"UnexpectedBooleanType".to_string(),
+							end,
+							len
+						))?
+					},
+					None => {
+						let (end, len) = get_end_len(expr);
+						Err(match_err(
+							file[*line].to_string(),
+							*line,
+							"UnDefinedVariable".to_string(),
+							end,
+							len
+						))?
+					},
+					_ => result.push(format!("{}{} += {};\n", set_tab(tab), name, value))
 				}
 			},
 			Stmt::PENUP(..) => {
@@ -364,7 +375,7 @@ pub fn transpiler_stmt<'a>(
 							return Err(match_err(
 								file[*line].to_string(),
 								*line,
-								"UnexpectedNumberType".to_string(),
+								"UnexpectedBooleanType".to_string(),
 								end,
 								len
 							))
