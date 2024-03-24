@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expr {
@@ -92,6 +92,23 @@ impl Function {
 		self.map.get("").unwrap().stmt_list.as_ref()
 	}
 
+	pub fn get_args_value(&self, name: &str) -> Option<usize> {
+		match self.map.get(name) {
+			Some(value) => Some(value.args.len()),
+			None => None,
+		}
+	}
+
+	pub fn get_args_by_name(&self, name: &str) -> HashSet<String> {
+		let mut set = HashSet::new();
+		self.map.get(name).unwrap().args.iter().for_each(|x| {
+			if let Assign::VAR(name, ..) = x.as_ref() {
+				set.insert(name.to_string());
+			}
+		});
+		set
+	}
+
 	pub fn get_args(&self) -> Vec<String> {
 		let mut list = vec![];
 		for arg in self.map.values() {
@@ -104,4 +121,7 @@ impl Function {
 		list
 	}
 
+	pub fn get_all(&self) -> &HashMap<String, FunctionType> {
+		&self.map
+	}
 }

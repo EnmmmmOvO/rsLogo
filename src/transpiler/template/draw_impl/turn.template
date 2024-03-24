@@ -1,0 +1,8 @@
+    pub fn turn(&mut self, angle: f32) -> Result<()> {
+        if !angle.is_finite() || !angle.is_finite() {
+            return Err(miette!("turn (draw.rs): Invalid angle value, must be a integer"));
+        }
+
+        self.direction += angle as i32;
+        Ok(())
+    }

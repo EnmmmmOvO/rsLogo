@@ -1,0 +1,10 @@
+    pub fn new(x: f32, y: f32, image: &'a mut Image) -> Self {
+        Self {
+            x: x / 2.0,
+            y: y / 2.0,
+            draw: false,
+            color: COLORS[7],
+            direction: 0,
+            image
+        }
+    }

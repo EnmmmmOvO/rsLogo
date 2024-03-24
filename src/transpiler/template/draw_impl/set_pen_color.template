@@ -1,0 +1,10 @@
+    pub fn set_pen_color(&mut self, index: f32) -> Result<()> {
+        if !index.is_finite() || !index.is_finite() || index < 0f32 || index > 15f32 {
+            return Err(miette!(
+                "set_pen_color (draw.rs): Invalid color range, must be a integer value between 0 and 15"
+            ));
+        }
+
+        self.color = COLORS[index as usize];
+        Ok(())
+    }

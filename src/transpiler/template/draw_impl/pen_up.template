@@ -1,0 +1,3 @@
+    pub fn pen_up(&mut self) {
+        self.draw = false;
+    }

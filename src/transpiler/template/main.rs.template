@@ -1,0 +1,23 @@
+mod draw;
+mod process;
+
+use unsvg::Image;
+use draw::Draw;
+use miette::{miette, Result};
+use crate::process::process_svg;
+
+fn main() -> Result<()> {
+    let width = {WIDTH};
+    let height = {HEIGHT};
+    let filename = "{FILENAME}.svg";
+
+    let mut image = Image::new(width, height);
+    let mut draw = Draw::new(width as f32, height as f32, &mut image);
+
+    process_svg(&mut draw)?;
+
+    if let Err(e) = image.save_svg(filename) {
+        return Err(miette!("Error saving svg: {e}"));
+    }
+    Ok(())
+}

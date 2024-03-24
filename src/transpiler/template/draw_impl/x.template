@@ -1,0 +1,3 @@
+    pub fn x(&self) -> f32 {
+        self.x
+    }

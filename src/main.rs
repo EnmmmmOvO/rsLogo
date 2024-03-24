@@ -1,8 +1,10 @@
+use std::fs;
 use clap::Parser;
 
 use miette::{miette, Result};
 use ast::parse_ast;
 use generation::code_generation;
+use transpiler::transpiler_rust;
 
 
 /// A simple program to parse four arguments using clap.
@@ -54,12 +56,16 @@ fn main() -> Result<()> {
                 return Err(miette!("Error saving png: {e}"));
             }
         }
-        Some("rs") => {
-            println!("Rust file detected");
-        }
-        _ => {
-            return Err(miette!("File extension not supported"));
-        }
+        None => {
+            fs::remove_dir_all(&image_path).unwrap_or_default();
+
+            if image_path.is_dir() || image_path.display().to_string().contains("/") {
+                return Err(miette!("Rust transpiler does not support directories"));
+            }
+
+            transpiler_rust(&image_path, ast, &file, width, height)?
+        },
+        _ => return Err(miette!("File extension not supported"))
     }
 
     Ok(())

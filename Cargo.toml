@@ -12,4 +12,4 @@ generation = { path = "src/generation" }
 unsvg = "1.1.1"
 clap = { version = "4.4.4", features = ["derive"] }
 miette = { version = "7.2.0", features = ["fancy"] }
-
+transpiler = { path = "src/transpiler" }

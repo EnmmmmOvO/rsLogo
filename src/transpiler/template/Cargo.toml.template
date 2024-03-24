@@ -1,5 +1,5 @@
 [package]
-name = "transpiler"
+name = "{FILENAME}"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 miette = { version = "7.2.0", features = ["fancy"] }
 thiserror = "1.0.58"
-ast = { path = "../ast" }
+unsvg = "1.1.2"

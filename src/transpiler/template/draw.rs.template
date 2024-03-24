@@ -1,0 +1,11 @@
+use unsvg::*;
+use miette::{miette, Result};
+
+pub struct Draw<'a> {
+    x: f32,
+    y: f32,
+    draw: bool,
+    color: Color,
+    direction: i32,
+    image: &'a mut Image,
+}

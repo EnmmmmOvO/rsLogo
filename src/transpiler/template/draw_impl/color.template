@@ -1,0 +1,3 @@
+    pub fn color(&self) -> usize {
+        COLORS.iter().position(|&c| c == self.color).unwrap()
+    }

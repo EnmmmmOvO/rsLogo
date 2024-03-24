@@ -1,0 +1,3 @@
+    pub fn set_x(&mut self, x: f32) {
+        self.x = x;
+    }
