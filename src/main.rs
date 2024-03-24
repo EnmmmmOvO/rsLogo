@@ -1,4 +1,3 @@
-use std::fs;
 use clap::Parser;
 
 use miette::{miette, Result};
