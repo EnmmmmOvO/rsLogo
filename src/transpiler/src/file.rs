@@ -46,7 +46,7 @@ fn export_draw_file(map: &DrawMethod, path: &PathBuf) -> Result<()> {
 
 	draw.push_str(&format!("\nimpl<'a> Draw<'a> {{\n{}}}", list.join("\n")));
 
-	File::create_new(
+	File::create(
 		format!("{}/src/draw.rs", path.display())
 	).into_diagnostic()?.write_all(draw.as_bytes()).into_diagnostic()?;
 
@@ -59,7 +59,7 @@ pub fn export_main_file(path: &PathBuf, width: u32, height: u32) -> Result<()> {
 		.replace("{HEIGHT}", &height.to_string())
 		.replace("{FILENAME}", &path.display().to_string());
 
-	File::create_new(
+	File::create(
 		format!("{}/src/main.rs", path.display())
 	).into_diagnostic()?.write_all(main.as_bytes()).into_diagnostic()?;
 
@@ -70,7 +70,7 @@ pub fn export_cargo_file(path: &PathBuf) -> Result<()> {
 	let main = read_file_to_string("src/transpiler/template/Cargo.toml.template")?
 		.replace("{FILENAME}", &path.display().to_string());
 
-	File::create_new(
+	File::create(
 		format!("{}/Cargo.toml", path.display())
 	).into_diagnostic()?.write_all(main.as_bytes()).into_diagnostic()?;
 
@@ -93,7 +93,7 @@ pub fn export_file(
 	export_main_file(path, width, height)?;
 	export_draw_file(map, path)?;
 
-	File::create_new(
+	File::create(
 		format!("{}/src/process.rs", path.display())
 	).into_diagnostic()?.write_all(result.join("\n").as_bytes()).into_diagnostic()?;
 
