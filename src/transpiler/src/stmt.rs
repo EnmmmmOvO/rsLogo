@@ -384,7 +384,7 @@ pub fn transpiler_stmt<'a>(
 				}
 
 				result.push(format!(
-					"{}{}({}, draw);\n",
+					"{}{}(draw, {});\n",
 					set_tab(tab),
 					name,
 					args_result.join(", ")

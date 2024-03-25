@@ -4,7 +4,7 @@ use thiserror::Error;
 #[derive(Error, Debug, Diagnostic)]
 #[error("{error}")]
 #[diagnostic(
-    code("Transpiler Error"),
+    code("Transpile Error"),
     help("{help}")
 )]
 pub enum TranspilerError<'a> {

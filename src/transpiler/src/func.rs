@@ -28,7 +28,7 @@ pub fn transpile_func<'a>(
 		).collect();
 
 		Ok(format!(
-			"fn {}({}, draw: &mut Draw) -> Result<()> {{\n{}\tOk(())\n}}\n",
+			"fn {}(draw: &mut Draw, {}) -> Result<()> {{\n{}\tOk(())\n}}\n",
 			name,
 			args.join(", "),
 			transpiler_stmt(stmt_list, file, method, &mut ast.get_args_by_name(name), 1, ast)?

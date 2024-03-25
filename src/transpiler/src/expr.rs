@@ -136,7 +136,7 @@ pub fn transpiler_expr<'a>(
 				transpiler_expr(expr2, line, sentence, variable, method)?
 			) {
 				(Value::F(left), Value::F(right)) => {
-					Ok(Value::F(format!("{} - {}", check_formula(left), check_formula(right))))
+					Ok(Value::F(format!("{} / {}", check_formula(left), check_formula(right))))
 				},
 				(Value::B(_), _) => {
 					let (end, len) = get_end_len(expr1);
@@ -292,7 +292,7 @@ pub fn transpiler_expr<'a>(
 				transpiler_expr(expr2, line, sentence, variable, method)?
 			) {
 				(Value::B(left), Value::B(right)) => {
-					Ok(Value::B(format!("{} && {}", check_formula(left), check_formula(right))))
+					Ok(Value::B(format!("{} || {}", check_formula(left), check_formula(right))))
 				},
 				(Value::F(_), _) => {
 					let (end, len) = get_end_len(expr1);

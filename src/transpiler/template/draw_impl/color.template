@@ -1,3 +1,3 @@
-    pub fn color(&self) -> usize {
-        COLORS.iter().position(|&c| c == self.color).unwrap()
+    pub fn color(&self) -> f32 {
+        COLORS.iter().position(|&c| c == self.color).unwrap() as f32
     }
