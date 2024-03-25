@@ -13,12 +13,22 @@ pub fn process_expr(expr: &Expr, variable: &Variable, line: usize, sentence: &st
 	match expr {
 		Expr::BOOLEAN(bool,..) => Ok(Value::B(*bool)),
 		Expr::FLOAT(num,..) => Ok(Value::F(*num)),
-		Expr::VAR(var,..) =>
+		Expr::VAR(var, end, len) =>
 			match variable.get(var) {
 				Some(Some(Type::F(num))) => Ok(Value::F(*num)),
 				Some(Some(Type::B(bool))) => Ok(Value::B(*bool)),
-				Some(None) => Ok(Value::F(0.0)),
-				None => Ok(Value::F(0.0)),
+				Some(None) => Err(match_err(sentence.to_string(),
+					line,
+					"UnDefinedVariableValue".to_string(),
+					*end,
+					*len
+				)),
+				None => Err(match_err(sentence.to_string(),
+					line,
+					"UnDefinedVariable".to_string(),
+					*end,
+					*len
+				))
 			}
 		,
 		Expr::ADD(expr1, expr2, end, len) => {
