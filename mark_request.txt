@@ -18,16 +18,35 @@ If you have completed a "design excellence" task, please write what
 the task was below (note, it MUST be on the list in the assignment or
 approved by COMP6991 staff).
 
->
+> Utilizing `miette`, error displays have been enhanced to include the phase of the error, its location in the lg file,
+  the original text of the error sentence, the nature of the error, and suggestions for feasible modifications.
+
+> A parser for lg files was built using nom, parsing lg files into a modified version of the Abstract Syntax Tree (AST).
+
+> A Rust transpiler was constructed to support translating lg files into Cargo projects for direct execution.
 
 Please write a paragraph or two (max. 250 words) describing how your design was
 influenced by this challenge, with specific reference to sections of your code.
 If you completed the "Pull Request" design excellence, please just leave a link
 to your PR.
 
->
->
->
+> I replaced almost all errors in the program with error displays from `miette`. Since the compilation of `AST`, the
+  generator and transpiler are relatively independent, I recorded the position of each expression (Expr) in the line
+  within the `AST`, as well as the line number where the statement (Stmt) appears in the original text. Thus, `miette`
+  can display the specific content and point out where an error occurred.
+
+> In the AST section, I output a modified version of the `AST`, including statements (Stmt, refer to the instructions or
+  actions in a program), expressions (Expr, represent pieces of code that evaluate to a value), assignments (assign
+  variable, to facilitate error detection since assignment and retrieval are different in lg), and functions (directly
+  in map form, for easy lookup in later sections).
+
+> In the Rust transpiler, since Rust has type requirements, all possible integers and all function calls are converted
+  to float. Checks are performed when dealing with potential integers or ranges, and errors are reported when run the
+  transpiled code if there is no match. Additionally, since Rust does not support assigning a bool to an i32 variable,
+  the type of the variable is checked during assignment. If the types do not match, let is used for overwriting.
+  Initially, the plan was to directly generate `.rs` files, but library support is needed when generating `SVGs`, so a
+  Cargo structure was created and setting up an independent workspace, supporting normal operation under a parent
+  folder containing a workspace cargo project.
 
 ## Design Limitations
 
@@ -35,11 +54,31 @@ If you made any design decisions which you now regret making; but don't to go ba
 let us know here. You can make up your design marks by acknowledging up to 5 things you would do
 differently now.
 
-> - TODO
+> The transpiler part does not support passing boolean values as arguments because the types are not known at the
+  time of function definition. To accurately determine the type, it would be necessary to traverse the contents of the
+  to section first and then infer the types based on the code executed within. Due to the complexity of this process,
+  this feature was not implemented.
 
 ## Other Comments
 
 If you want to let us know something else about your program, put it here!
 (Feel free to leave this blank)
 
-> TODO
+> The program supports using `IF` and `WHILE` conditional statements in `TO`; versions that directly generate `SVG` or
+  `PNG` support passing bool as args directly into `TO`, but the transpiler does not support bool as args.
+
+> When processing variable names, the program only allows variable names accepted by Rust. Pure numbers or symbols
+  other than underscores will result in an error.
+
+> The transpiler section directly creates a Cargo project, including the corresponding `cargo.toml` file, `src` folder,
+  etc., supporting direct `cargo run`. Errors that might not be detected by the transpiler (such as division by zero,
+  the variable is not an integer) will throw during run the transpiled code. To use the transpiler, enter a folder name
+  without a suffix as the second args; if the folder name exists in the project's main directory or is a path, it will
+  result in an error. (Running "cargo run 'test.lg' 'svg' 300 300" will generate a folder named svg in this directory,
+  where you can directly run `cargo run`).
+
+> In the transpiler section, there's an effort to reduce the potential warnings prompted by Cargo after translating to
+  Rust, but based on the content of the lg file, there might still be errors such as unused variables, or variable
+  names and function names not meeting Rust's naming requirements.
+
+> The transpiler section supports translating comments as well.
