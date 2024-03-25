@@ -1,15 +1,6 @@
-use crate::stmt::process_stmt;
-use ast::structs::Function;
-use draw::Draw;
-use err::GenerationError;
+use crate::ast::structs::Function;
+use crate::generation::{draw::Draw, err::GenerationError, stmt::process_stmt, variable::Variable};
 use unsvg::Image;
-use variable::Variable;
-
-mod draw;
-mod err;
-mod expr;
-mod stmt;
-mod variable;
 
 pub fn code_generation(
     ast: Function,

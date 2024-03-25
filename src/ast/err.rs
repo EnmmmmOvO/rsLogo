@@ -1,4 +1,4 @@
-use crate::structs::{Assign, Decl, DeclName, Expr, Stmt};
+use crate::ast::structs::{Assign, Decl, DeclName, Expr, Stmt};
 use miette::{Diagnostic, SourceSpan};
 use thiserror::Error;
 
@@ -220,12 +220,12 @@ pub fn match_err<'a>(
 }
 
 pub fn check_decl_err(input: &Decl) -> Option<(String, usize, usize)> {
-    if let DeclName::ERROR(s, end, len) = &*input.name {
+    if let DeclName::Error(s, end, len) = &*input.name {
         return Some((s.to_string(), *end, *len));
     }
 
     for var in input.var.iter() {
-        if let Assign::ERROR(s, end, len) = var.as_ref() {
+        if let Assign::Error(s, end, len) = &var {
             return Some((s.to_string(), *end, *len));
         }
     }
@@ -234,36 +234,36 @@ pub fn check_decl_err(input: &Decl) -> Option<(String, usize, usize)> {
 
 pub fn check_decl_name_err(input: &DeclName) -> Option<(String, usize, usize)> {
     match input {
-        DeclName::ERROR(s, end, len) => Some((s.to_string(), *end, *len)),
+        DeclName::Error(s, end, len) => Some((s.to_string(), *end, *len)),
         _ => None,
     }
 }
 
 pub fn check_stmt_err(input: &Stmt) -> Option<(String, usize, usize)> {
     match input {
-        Stmt::IF(expr, ..) | Stmt::WHILE(expr, ..) => check_expr_err(expr.as_ref()),
-        Stmt::MAKE(expr1, expr2, ..) | Stmt::ADDASSIGN(expr1, expr2, ..) => {
+        Stmt::If(expr, ..) | Stmt::While(expr, ..) => check_expr_err(expr.as_ref()),
+        Stmt::Make(expr1, expr2, ..) | Stmt::AddAssign(expr1, expr2, ..) => {
             if let Some(temp) = check_assign_err(expr1.as_ref()) {
                 return Some(temp);
             }
             check_expr_err(expr2.as_ref())
         }
-        Stmt::FORWARD(expr, ..)
-        | Stmt::BACK(expr, ..)
-        | Stmt::LEFT(expr, ..)
-        | Stmt::RIGHT(expr, ..)
-        | Stmt::SETPENCOLOR(expr, ..)
-        | Stmt::TURN(expr, ..)
-        | Stmt::SETHEADING(expr, ..)
-        | Stmt::SETX(expr, ..)
-        | Stmt::SETY(expr, ..) => check_expr_err(expr.as_ref()),
-        Stmt::FUNC(name, assign, ..) => {
+        Stmt::Forward(expr, ..)
+        | Stmt::Back(expr, ..)
+        | Stmt::Left(expr, ..)
+        | Stmt::Right(expr, ..)
+        | Stmt::SetPenColor(expr, ..)
+        | Stmt::Turn(expr, ..)
+        | Stmt::SetHeading(expr, ..)
+        | Stmt::SetX(expr, ..)
+        | Stmt::SetY(expr, ..) => check_expr_err(expr.as_ref()),
+        Stmt::Func(name, assign, ..) => {
             if let Some(temp) = check_decl_name_err(name.as_ref()) {
                 return Some(temp);
             }
 
             for var in assign.iter() {
-                if let Some(temp) = check_expr_err(var.as_ref()) {
+                if let Some(temp) = check_expr_err(var) {
                     return Some(temp);
                 }
             }
@@ -275,31 +275,31 @@ pub fn check_stmt_err(input: &Stmt) -> Option<(String, usize, usize)> {
 
 pub fn check_assign_err(input: &Assign) -> Option<(String, usize, usize)> {
     match input {
-        Assign::ERROR(s, end, len) => Some((s.to_string(), *end, *len)),
+        Assign::Error(s, end, len) => Some((s.to_string(), *end, *len)),
         _ => None,
     }
 }
 
 pub fn check_expr_err(input: &Expr) -> Option<(String, usize, usize)> {
     match input {
-        Expr::ADD(a, b, ..)
-        | Expr::SUB(a, b, ..)
-        | Expr::MUL(a, b, ..)
-        | Expr::DIV(a, b, ..)
-        | Expr::EQ(a, b, ..)
-        | Expr::NE(a, b, ..)
-        | Expr::LT(a, b, ..)
-        | Expr::GT(a, b, ..)
-        | Expr::AND(a, b, ..)
-        | Expr::OR(a, b, ..) => {
+        Expr::Add(a, b, ..)
+        | Expr::Sub(a, b, ..)
+        | Expr::Mul(a, b, ..)
+        | Expr::Div(a, b, ..)
+        | Expr::Eq(a, b, ..)
+        | Expr::Ne(a, b, ..)
+        | Expr::Lt(a, b, ..)
+        | Expr::Gt(a, b, ..)
+        | Expr::And(a, b, ..)
+        | Expr::Or(a, b, ..) => {
             let (a, b) = (a.as_ref(), b.as_ref());
             match (a, b) {
-                (Expr::ERROR(s, end, len), _) => Some((s.to_string(), *end, *len)),
-                (_, Expr::ERROR(s, end, len)) => Some((s.to_string(), *end, *len)),
+                (Expr::Error(s, end, len), _) => Some((s.to_string(), *end, *len)),
+                (_, Expr::Error(s, end, len)) => Some((s.to_string(), *end, *len)),
                 _ => None,
             }
         }
-        Expr::ERROR(s, end, len) => Some((s.to_string(), *end, *len)),
+        Expr::Error(s, end, len) => Some((s.to_string(), *end, *len)),
         _ => None,
     }
 }

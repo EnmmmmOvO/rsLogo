@@ -1,7 +1,9 @@
-use crate::draw::Draw;
-use crate::err::{match_err, GenerationError};
-use crate::variable::{Type, Variable};
-use ast::structs::Expr;
+use crate::ast::structs::Expr;
+use crate::generation::{
+    draw::Draw,
+    err::{match_err, GenerationError},
+    variable::{Type, Variable},
+};
 
 #[derive(Debug, PartialEq)]
 pub enum Value {
@@ -17,9 +19,9 @@ pub fn process_expr(
     draw: &Draw,
 ) -> Result<Value, GenerationError<'static>> {
     match expr {
-        Expr::BOOLEAN(bool, ..) => Ok(Value::B(*bool)),
-        Expr::FLOAT(num, ..) => Ok(Value::F(*num)),
-        Expr::VAR(var, end, len) => match variable.get(var) {
+        Expr::Boolean(bool, ..) => Ok(Value::B(*bool)),
+        Expr::Float(num, ..) => Ok(Value::F(*num)),
+        Expr::Var(var, end, len) => match variable.get(var) {
             Some(Some(Type::F(num))) => Ok(Value::F(*num)),
             Some(Some(Type::B(bool))) => Ok(Value::B(*bool)),
             Some(None) => Err(match_err(
@@ -37,7 +39,7 @@ pub fn process_expr(
                 *len,
             )),
         },
-        Expr::ADD(expr1, expr2, end, len) => {
+        Expr::Add(expr1, expr2, end, len) => {
             if let Value::F(num1) = process_expr(expr1, variable, line, sentence, draw)? {
                 if let Value::F(num2) = process_expr(expr2, variable, line, sentence, draw)? {
                     Ok(Value::F(num1 + num2))
@@ -60,7 +62,7 @@ pub fn process_expr(
                 ))
             }
         }
-        Expr::SUB(expr1, expr2, end, len) => {
+        Expr::Sub(expr1, expr2, end, len) => {
             if let Value::F(num1) = process_expr(expr1, variable, line, sentence, draw)? {
                 if let Value::F(num2) = process_expr(expr2, variable, line, sentence, draw)? {
                     Ok(Value::F(num1 - num2))
@@ -83,7 +85,7 @@ pub fn process_expr(
                 ))
             }
         }
-        Expr::MUL(expr1, expr2, end, len) => {
+        Expr::Mul(expr1, expr2, end, len) => {
             if let Value::F(num1) = process_expr(expr1, variable, line, sentence, draw)? {
                 if let Value::F(num2) = process_expr(expr2, variable, line, sentence, draw)? {
                     Ok(Value::F(num1 * num2))
@@ -106,7 +108,7 @@ pub fn process_expr(
                 ))
             }
         }
-        Expr::DIV(expr1, expr2, end, len) => {
+        Expr::Div(expr1, expr2, end, len) => {
             if let Value::F(num1) = process_expr(expr1, variable, line, sentence, draw)? {
                 if let Value::F(num2) = process_expr(expr2, variable, line, sentence, draw)? {
                     if num2 == 0.0 {
@@ -138,7 +140,7 @@ pub fn process_expr(
                 ))
             }
         }
-        Expr::EQ(expr1, expr2, end, len) => {
+        Expr::Eq(expr1, expr2, end, len) => {
             match (
                 process_expr(expr1, variable, line, sentence, draw)?,
                 process_expr(expr2, variable, line, sentence, draw)?,
@@ -154,7 +156,7 @@ pub fn process_expr(
                 )),
             }
         }
-        Expr::NE(expr1, expr2, end, len) => {
+        Expr::Ne(expr1, expr2, end, len) => {
             match (
                 process_expr(expr1, variable, line, sentence, draw)?,
                 process_expr(expr2, variable, line, sentence, draw)?,
@@ -170,7 +172,7 @@ pub fn process_expr(
                 )),
             }
         }
-        Expr::LT(expr1, expr2, ..) => {
+        Expr::Lt(expr1, expr2, ..) => {
             match (
                 process_expr(expr1, variable, line, sentence, draw)?,
                 process_expr(expr2, variable, line, sentence, draw)?,
@@ -198,7 +200,7 @@ pub fn process_expr(
                 }
             }
         }
-        Expr::GT(expr1, expr2, ..) => {
+        Expr::Gt(expr1, expr2, ..) => {
             match (
                 process_expr(expr1, variable, line, sentence, draw)?,
                 process_expr(expr2, variable, line, sentence, draw)?,
@@ -226,7 +228,7 @@ pub fn process_expr(
                 }
             }
         }
-        Expr::AND(expr1, expr2, ..) => {
+        Expr::And(expr1, expr2, ..) => {
             match (
                 process_expr(expr1, variable, line, sentence, draw)?,
                 process_expr(expr2, variable, line, sentence, draw)?,
@@ -254,7 +256,7 @@ pub fn process_expr(
                 }
             }
         }
-        Expr::OR(expr1, expr2, ..) => {
+        Expr::Or(expr1, expr2, ..) => {
             match (
                 process_expr(expr1, variable, line, sentence, draw)?,
                 process_expr(expr2, variable, line, sentence, draw)?,
@@ -282,33 +284,33 @@ pub fn process_expr(
                 }
             }
         }
-        Expr::XCOR(..) => Ok(Value::F(draw.x())),
-        Expr::YCOR(..) => Ok(Value::F(draw.y())),
-        Expr::HEADING(..) => Ok(Value::F(draw.direction() as f32)),
-        Expr::COLOR(..) => Ok(Value::F(draw.color() as f32)),
+        Expr::XCor(..) => Ok(Value::F(draw.x())),
+        Expr::YCor(..) => Ok(Value::F(draw.y())),
+        Expr::Heading(..) => Ok(Value::F(draw.direction() as f32)),
+        Expr::Color(..) => Ok(Value::F(draw.color() as f32)),
         _ => unreachable!(),
     }
 }
 
 pub fn get_end_len(expr: &Expr) -> (usize, usize) {
     match expr {
-        Expr::FLOAT(.., end, len)
-        | Expr::VAR(.., end, len)
-        | Expr::ADD(.., end, len)
-        | Expr::SUB(.., end, len)
-        | Expr::MUL(.., end, len)
-        | Expr::DIV(.., end, len)
-        | Expr::XCOR(end, len)
-        | Expr::YCOR(end, len)
-        | Expr::HEADING(end, len)
-        | Expr::COLOR(end, len)
-        | Expr::EQ(.., end, len)
-        | Expr::NE(.., end, len)
-        | Expr::LT(.., end, len)
-        | Expr::GT(.., end, len)
-        | Expr::AND(.., end, len)
-        | Expr::OR(.., end, len)
-        | Expr::BOOLEAN(.., end, len) => (*end, *len),
+        Expr::Float(.., end, len)
+        | Expr::Var(.., end, len)
+        | Expr::Add(.., end, len)
+        | Expr::Sub(.., end, len)
+        | Expr::Mul(.., end, len)
+        | Expr::Div(.., end, len)
+        | Expr::XCor(end, len)
+        | Expr::YCor(end, len)
+        | Expr::Heading(end, len)
+        | Expr::Color(end, len)
+        | Expr::Eq(.., end, len)
+        | Expr::Ne(.., end, len)
+        | Expr::Lt(.., end, len)
+        | Expr::Gt(.., end, len)
+        | Expr::And(.., end, len)
+        | Expr::Or(.., end, len)
+        | Expr::Boolean(.., end, len) => (*end, *len),
         _ => unreachable!(),
     }
 }

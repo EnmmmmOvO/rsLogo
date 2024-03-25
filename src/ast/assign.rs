@@ -1,5 +1,4 @@
-use crate::structs::Assign;
-use crate::support::check_name;
+use crate::ast::{structs::Assign, support::check_name};
 use nom::branch::alt;
 use nom::{
     bytes::complete::is_not,
@@ -14,12 +13,12 @@ pub fn parse_var(input: &str) -> IResult<&str, Assign> {
     if check_name(s) {
         Ok((
             temp,
-            Assign::VAR(s.to_string(), temp.len(), input.len() - temp.len()),
+            Assign::Var(s.to_string(), temp.len(), input.len() - temp.len()),
         ))
     } else {
         Ok((
             temp,
-            Assign::ERROR(
+            Assign::Error(
                 "InvalidName".to_string(),
                 temp.len(),
                 input.len() - temp.len(),
@@ -32,7 +31,7 @@ pub fn parse_error(input: &str) -> IResult<&str, Assign> {
     let (temp, _) = delimited(space0, is_not(" "), space0)(input)?;
     Ok((
         temp,
-        Assign::ERROR(
+        Assign::Error(
             "UnexpectedAssign".to_string(),
             temp.len(),
             input.len() - temp.len(),

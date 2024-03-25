@@ -1,13 +1,9 @@
-mod err;
-mod expr;
-mod file;
-mod func;
-mod stmt;
+use crate::ast::structs::Function;
+use crate::transpiler::{
+    file::{export_file, DrawMethod},
+    func::transpile_func,
+};
 
-use crate::file::export_file;
-use crate::func::transpile_func;
-use ast::structs::Function;
-use file::DrawMethod;
 use miette::Result;
 use std::path::PathBuf;
 

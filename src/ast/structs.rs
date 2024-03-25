@@ -2,68 +2,68 @@ use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expr {
-    BOOLEAN(bool, usize, usize),
-    FLOAT(f32, usize, usize),
-    VAR(String, usize, usize),
-    ADD(Box<Expr>, Box<Expr>, usize, usize),
-    SUB(Box<Expr>, Box<Expr>, usize, usize),
-    MUL(Box<Expr>, Box<Expr>, usize, usize),
-    DIV(Box<Expr>, Box<Expr>, usize, usize),
-    EQ(Box<Expr>, Box<Expr>, usize, usize),
-    NE(Box<Expr>, Box<Expr>, usize, usize),
-    LT(Box<Expr>, Box<Expr>, usize, usize),
-    GT(Box<Expr>, Box<Expr>, usize, usize),
-    AND(Box<Expr>, Box<Expr>, usize, usize),
-    OR(Box<Expr>, Box<Expr>, usize, usize),
-    XCOR(usize, usize),
-    YCOR(usize, usize),
-    HEADING(usize, usize),
-    COLOR(usize, usize),
-    ERROR(String, usize, usize),
+    Boolean(bool, usize, usize),
+    Float(f32, usize, usize),
+    Var(String, usize, usize),
+    Add(Box<Expr>, Box<Expr>, usize, usize),
+    Sub(Box<Expr>, Box<Expr>, usize, usize),
+    Mul(Box<Expr>, Box<Expr>, usize, usize),
+    Div(Box<Expr>, Box<Expr>, usize, usize),
+    Eq(Box<Expr>, Box<Expr>, usize, usize),
+    Ne(Box<Expr>, Box<Expr>, usize, usize),
+    Lt(Box<Expr>, Box<Expr>, usize, usize),
+    Gt(Box<Expr>, Box<Expr>, usize, usize),
+    And(Box<Expr>, Box<Expr>, usize, usize),
+    Or(Box<Expr>, Box<Expr>, usize, usize),
+    XCor(usize, usize),
+    YCor(usize, usize),
+    Heading(usize, usize),
+    Color(usize, usize),
+    Error(String, usize, usize),
 }
 
 #[derive(Debug, PartialEq)]
 pub enum Stmt {
-    IF(Box<Expr>, Vec<Stmt>, usize),
-    WHILE(Box<Expr>, Vec<Stmt>, usize),
-    MAKE(Box<Assign>, Box<Expr>, usize),
-    PENUP(usize),
-    PENDOWN(usize),
-    FORWARD(Box<Expr>, usize),
-    BACK(Box<Expr>, usize),
-    LEFT(Box<Expr>, usize),
-    RIGHT(Box<Expr>, usize),
-    SETPENCOLOR(Box<Expr>, usize),
-    TURN(Box<Expr>, usize),
-    SETHEADING(Box<Expr>, usize),
-    SETX(Box<Expr>, usize),
-    SETY(Box<Expr>, usize),
-    ADDASSIGN(Box<Assign>, Box<Expr>, usize),
-    FUNC(Box<DeclName>, Vec<Box<Expr>>, usize),
-    COMMENT(String, usize),
+    If(Box<Expr>, Vec<Stmt>, usize),
+    While(Box<Expr>, Vec<Stmt>, usize),
+    Make(Box<Assign>, Box<Expr>, usize),
+    PenUp(usize),
+    PenDown(usize),
+    Forward(Box<Expr>, usize),
+    Back(Box<Expr>, usize),
+    Left(Box<Expr>, usize),
+    Right(Box<Expr>, usize),
+    SetPenColor(Box<Expr>, usize),
+    Turn(Box<Expr>, usize),
+    SetHeading(Box<Expr>, usize),
+    SetX(Box<Expr>, usize),
+    SetY(Box<Expr>, usize),
+    AddAssign(Box<Assign>, Box<Expr>, usize),
+    Func(Box<DeclName>, Vec<Expr>, usize),
+    Comments(String, usize),
 }
 
 #[derive(Debug, PartialEq)]
 pub struct Decl {
     pub name: Box<DeclName>,
-    pub var: Vec<Box<Assign>>,
+    pub var: Vec<Assign>,
 }
 
 #[derive(Debug, PartialEq)]
 pub enum Assign {
-    VAR(String, usize, usize),
-    ERROR(String, usize, usize),
+    Var(String, usize, usize),
+    Error(String, usize, usize),
 }
 
 #[derive(Debug, PartialEq)]
 pub enum DeclName {
-    STRING(String, usize, usize),
-    ERROR(String, usize, usize),
+    String(String, usize, usize),
+    Error(String, usize, usize),
 }
 
 #[derive(Debug, PartialEq)]
 pub struct FunctionType {
-    pub args: Vec<Box<Assign>>,
+    pub args: Vec<Assign>,
     pub stmt_list: Vec<Stmt>,
 }
 
@@ -89,7 +89,7 @@ impl Function {
         self.map.contains_key(name)
     }
 
-    pub fn insert(&mut self, name: String, args: Vec<Box<Assign>>, stmt_list: Vec<Stmt>) {
+    pub fn insert(&mut self, name: String, args: Vec<Assign>, stmt_list: Vec<Stmt>) {
         self.map.insert(name, FunctionType { args, stmt_list });
     }
 
@@ -108,7 +108,7 @@ impl Function {
     pub fn get_args_by_name(&self, name: &str) -> HashMap<String, bool> {
         let mut set = HashMap::new();
         self.map.get(name).unwrap().args.iter().for_each(|x| {
-            if let Assign::VAR(name, ..) = x.as_ref() {
+            if let Assign::Var(name, ..) = &x {
                 set.insert(name.to_string(), false);
             }
         });
@@ -119,7 +119,7 @@ impl Function {
         let mut list = vec![];
         for arg in self.map.values() {
             for a in arg.args.iter() {
-                if let Assign::VAR(name, ..) = a.as_ref() {
+                if let Assign::Var(name, ..) = &a {
                     list.push(name.to_string());
                 }
             }

@@ -1,12 +1,9 @@
-use crate::err::TranspilerError;
-use crate::file::DrawMethod;
-use crate::stmt::transpiler_stmt;
-use ast::structs::Assign;
-use ast::structs::{Function, Stmt};
+use crate::ast::structs::{Assign, Function, Stmt};
+use crate::transpiler::{err::TranspilerError, file::DrawMethod, stmt::transpiler_stmt};
 use std::collections::HashMap;
 
 pub fn transpile_func<'a>(
-    args: &[Box<Assign>],
+    args: &[Assign],
     stmt_list: &Vec<Stmt>,
     name: &str,
     file: &[String],
@@ -22,7 +19,7 @@ pub fn transpile_func<'a>(
         let args: Vec<String> = args
             .iter()
             .map(|x| {
-                if let Assign::VAR(name, ..) = x.as_ref() {
+                if let Assign::Var(name, ..) = &x {
                     format!("{}: f32", name)
                 } else {
                     unreachable!();

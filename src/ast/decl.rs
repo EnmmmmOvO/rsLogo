@@ -1,6 +1,8 @@
-use crate::structs::{Assign, DeclName};
-use crate::support::check_name;
-use crate::{assign::parse_assign, structs::Decl};
+use crate::ast::{
+    assign::parse_assign,
+    structs::{Assign, Decl, DeclName},
+    support::check_name,
+};
 use nom::{
     bytes::complete::{is_not, tag},
     character::complete::space0,
@@ -12,13 +14,13 @@ pub fn parse_decl(input: &str) -> IResult<&str, Decl> {
     let (input, _) = delimited(space0, tag("TO"), space0)(input)?;
     let (input, name) = parse_decl_name(input).unwrap_or((
         input,
-        DeclName::ERROR("MissingName".to_string(), input.len(), 1),
+        DeclName::Error("MissingName".to_string(), input.len(), 1),
     ));
-    let mut var: Vec<Box<Assign>> = Vec::new();
+    let mut var: Vec<Assign> = Vec::new();
     let mut temp = input;
 
     while let Ok((str, assign)) = parse_assign(temp) {
-        var.push(Box::new(assign));
+        var.push(assign);
         temp = str;
     }
 
@@ -36,12 +38,12 @@ pub fn parse_decl_name(input: &str) -> IResult<&str, DeclName> {
     if check_name(s) {
         Ok((
             temp,
-            DeclName::STRING(s.to_string(), temp.len(), input.len() - temp.len()),
+            DeclName::String(s.to_string(), temp.len(), input.len() - temp.len()),
         ))
     } else {
         Ok((
             temp,
-            DeclName::ERROR(
+            DeclName::Error(
                 "InvalidName".to_string(),
                 temp.len(),
                 input.len() - temp.len(),

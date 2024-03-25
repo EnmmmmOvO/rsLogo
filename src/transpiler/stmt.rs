@@ -1,7 +1,9 @@
-use crate::err::{match_err, TranspilerError};
-use crate::expr::{get_end_len, transpiler_expr, Value};
-use crate::file::DrawMethod;
-use ast::structs::{Assign, DeclName, Function, Stmt};
+use crate::ast::structs::{Assign, DeclName, Function, Stmt};
+use crate::transpiler::{
+    err::{match_err, TranspilerError},
+    expr::{get_end_len, transpiler_expr, Value},
+    file::DrawMethod,
+};
 use std::collections::HashMap;
 
 pub fn transpiler_stmt<'a>(
@@ -16,7 +18,7 @@ pub fn transpiler_stmt<'a>(
 
     for stmt in stmt_list {
         match stmt {
-            Stmt::IF(expr, stmt, line) => {
+            Stmt::If(expr, stmt, line) => {
                 let condition = match transpiler_expr(expr, *line, &file[*line], variable, method)?
                 {
                     Value::B(bool) => bool,
@@ -40,7 +42,7 @@ pub fn transpiler_stmt<'a>(
                     set_tab(tab)
                 ));
             }
-            Stmt::WHILE(expr, stmt, line) => {
+            Stmt::While(expr, stmt, line) => {
                 let condition = match transpiler_expr(expr, *line, &file[*line], variable, method)?
                 {
                     Value::B(bool) => bool,
@@ -64,9 +66,9 @@ pub fn transpiler_stmt<'a>(
                     set_tab(tab)
                 ));
             }
-            Stmt::MAKE(assign, expr, line) => {
+            Stmt::Make(assign, expr, line) => {
                 let name = match assign.as_ref() {
-                    Assign::VAR(name, ..) => name,
+                    Assign::Var(name, ..) => name,
                     _ => unreachable!(),
                 };
 
@@ -87,9 +89,9 @@ pub fn transpiler_stmt<'a>(
                     },
                 };
             }
-            Stmt::ADDASSIGN(assign, expr, line) => {
+            Stmt::AddAssign(assign, expr, line) => {
                 let name = match assign.as_ref() {
-                    Assign::VAR(name, ..) => name,
+                    Assign::Var(name, ..) => name,
                     _ => unreachable!(),
                 };
 
@@ -131,15 +133,15 @@ pub fn transpiler_stmt<'a>(
                     _ => result.push(format!("{}{} += {};\n", set_tab(tab), name, value)),
                 }
             }
-            Stmt::PENUP(..) => {
+            Stmt::PenUp(..) => {
                 method.insert("pen_up".to_string());
                 result.push(format!("{}draw.pen_up();\n", set_tab(tab)));
             }
-            Stmt::PENDOWN(..) => {
+            Stmt::PenDown(..) => {
                 method.insert("pen_down".to_string());
                 result.push(format!("{}draw.pen_down();\n", set_tab(tab)));
             }
-            Stmt::FORWARD(expr, line) => {
+            Stmt::Forward(expr, line) => {
                 let value = match transpiler_expr(expr, *line, &file[*line], variable, method)? {
                     Value::F(num) => num,
                     _ => {
@@ -157,7 +159,7 @@ pub fn transpiler_stmt<'a>(
                 method.insert("pen_move".to_string());
                 result.push(format!("{}draw.pen_move(0, {})?;\n", set_tab(tab), value));
             }
-            Stmt::BACK(expr, line) => {
+            Stmt::Back(expr, line) => {
                 let value = match transpiler_expr(expr, *line, &file[*line], variable, method)? {
                     Value::F(num) => num,
                     _ => {
@@ -175,7 +177,7 @@ pub fn transpiler_stmt<'a>(
                 method.insert("pen_move".to_string());
                 result.push(format!("{}draw.pen_move(180, {})?;\n", set_tab(tab), value));
             }
-            Stmt::LEFT(expr, line) => {
+            Stmt::Left(expr, line) => {
                 let value = match transpiler_expr(expr, *line, &file[*line], variable, method)? {
                     Value::F(num) => num,
                     _ => {
@@ -193,7 +195,7 @@ pub fn transpiler_stmt<'a>(
                 method.insert("pen_move".to_string());
                 result.push(format!("{}draw.pen_move(-90, {})?;\n", set_tab(tab), value));
             }
-            Stmt::RIGHT(expr, line) => {
+            Stmt::Right(expr, line) => {
                 let value = match transpiler_expr(expr, *line, &file[*line], variable, method)? {
                     Value::F(num) => num,
                     _ => {
@@ -211,7 +213,7 @@ pub fn transpiler_stmt<'a>(
                 method.insert("pen_move".to_string());
                 result.push(format!("{}draw.pen_move(90, {})?;\n", set_tab(tab), value));
             }
-            Stmt::SETPENCOLOR(expr, line) => {
+            Stmt::SetPenColor(expr, line) => {
                 let value = match transpiler_expr(expr, *line, &file[*line], variable, method)? {
                     Value::F(num) => num,
                     _ => {
@@ -229,7 +231,7 @@ pub fn transpiler_stmt<'a>(
                 method.insert("set_pen_color".to_string());
                 result.push(format!("{}draw.set_pen_color({})?;\n", set_tab(tab), value));
             }
-            Stmt::TURN(expr, line) => {
+            Stmt::Turn(expr, line) => {
                 let value = match transpiler_expr(expr, *line, &file[*line], variable, method)? {
                     Value::F(num) => num,
                     _ => {
@@ -247,7 +249,7 @@ pub fn transpiler_stmt<'a>(
                 method.insert("turn".to_string());
                 result.push(format!("{}draw.turn({})?;\n", set_tab(tab), value));
             }
-            Stmt::SETHEADING(expr, line) => {
+            Stmt::SetHeading(expr, line) => {
                 let value = match transpiler_expr(expr, *line, &file[*line], variable, method)? {
                     Value::F(num) => num,
                     _ => {
@@ -265,7 +267,7 @@ pub fn transpiler_stmt<'a>(
                 method.insert("set_heading".to_string());
                 result.push(format!("{}draw.set_heading({})?;\n", set_tab(tab), value));
             }
-            Stmt::SETX(expr, line) => {
+            Stmt::SetX(expr, line) => {
                 let value = match transpiler_expr(expr, *line, &file[*line], variable, method)? {
                     Value::F(num) => num,
                     _ => {
@@ -283,7 +285,7 @@ pub fn transpiler_stmt<'a>(
                 method.insert("set_x".to_string());
                 result.push(format!("{}draw.set_x({});\n", set_tab(tab), value));
             }
-            Stmt::SETY(expr, line) => {
+            Stmt::SetY(expr, line) => {
                 let value = match transpiler_expr(expr, *line, &file[*line], variable, method)? {
                     Value::F(num) => num,
                     _ => {
@@ -301,9 +303,9 @@ pub fn transpiler_stmt<'a>(
                 method.insert("set_y".to_string());
                 result.push(format!("{}draw.set_y({});\n", set_tab(tab), value));
             }
-            Stmt::FUNC(name, args, line) => {
+            Stmt::Func(name, args, line) => {
                 let (name, end, len) = match name.as_ref() {
-                    DeclName::STRING(name, end, len) => (name, end, len),
+                    DeclName::String(name, end, len) => (name, end, len),
                     _ => unreachable!(),
                 };
 
@@ -362,7 +364,7 @@ pub fn transpiler_stmt<'a>(
                     args_result.join(", ")
                 ));
             }
-            Stmt::COMMENT(comment, ..) => result.push(format!("{}// {}\n", set_tab(tab), comment)),
+            Stmt::Comments(comment, ..) => result.push(format!("{}// {}\n", set_tab(tab), comment)),
         }
     }
 

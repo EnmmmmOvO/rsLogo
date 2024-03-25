@@ -1,5 +1,4 @@
-use crate::structs::Expr;
-use crate::support::check_name;
+use crate::ast::{structs::Expr, support::check_name};
 use nom::{
     branch::alt,
     bytes::complete::{is_not, tag, take_while1},
@@ -12,7 +11,7 @@ fn parse_true(input: &str) -> IResult<&str, Expr> {
     let (temp, _) = delimited(space0, tag("\"TRUE"), space0)(input)?;
     Ok((
         temp,
-        Expr::BOOLEAN(true, temp.len(), input.len() - temp.len()),
+        Expr::Boolean(true, temp.len(), input.len() - temp.len()),
     ))
 }
 
@@ -20,7 +19,7 @@ fn parse_false(input: &str) -> IResult<&str, Expr> {
     let (temp, _) = delimited(space0, tag("\"FALSE"), space0)(input)?;
     Ok((
         temp,
-        Expr::BOOLEAN(false, temp.len(), input.len() - temp.len()),
+        Expr::Boolean(false, temp.len(), input.len() - temp.len()),
     ))
 }
 
@@ -36,10 +35,10 @@ fn parse_num(input: &str) -> IResult<&str, Expr> {
     )(input)?;
 
     match num.parse::<f32>() {
-        Ok(f) => Ok((temp, Expr::FLOAT(f, temp.len(), input.len() - temp.len()))),
+        Ok(f) => Ok((temp, Expr::Float(f, temp.len(), input.len() - temp.len()))),
         Err(_) => Ok((
             temp,
-            Expr::ERROR(
+            Expr::Error(
                 "InvalidNum".to_string(),
                 temp.len(),
                 input.len() - temp.len(),
@@ -54,12 +53,12 @@ fn parse_var(input: &str) -> IResult<&str, Expr> {
     if check_name(s) {
         Ok((
             temp,
-            Expr::VAR(s.to_string(), temp.len(), input.len() - temp.len()),
+            Expr::Var(s.to_string(), temp.len(), input.len() - temp.len()),
         ))
     } else {
         Ok((
             temp,
-            Expr::ERROR(
+            Expr::Error(
                 "InvalidName".to_string(),
                 temp.len(),
                 input.len() - temp.len(),
@@ -72,15 +71,15 @@ fn parse_add(input: &str) -> IResult<&str, Expr> {
     let (temp, _) = delimited(space0, char('+'), space0)(input)?;
     let (temp, left) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     let (temp, right) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     Ok((
         temp,
-        Expr::ADD(
+        Expr::Add(
             Box::new(left),
             Box::new(right),
             temp.len(),
@@ -93,15 +92,15 @@ fn parse_sub(input: &str) -> IResult<&str, Expr> {
     let (temp, _) = delimited(space0, char('-'), space0)(input)?;
     let (temp, left) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     let (temp, right) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     Ok((
         temp,
-        Expr::SUB(
+        Expr::Sub(
             Box::new(left),
             Box::new(right),
             temp.len(),
@@ -114,15 +113,15 @@ fn parse_mul(input: &str) -> IResult<&str, Expr> {
     let (temp, _) = delimited(space0, char('*'), space0)(input)?;
     let (temp, left) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     let (temp, right) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     Ok((
         temp,
-        Expr::MUL(
+        Expr::Mul(
             Box::new(left),
             Box::new(right),
             temp.len(),
@@ -135,15 +134,15 @@ fn parse_div(input: &str) -> IResult<&str, Expr> {
     let (temp, _) = delimited(space0, char('/'), space0)(input)?;
     let (temp, left) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     let (temp, right) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     Ok((
         temp,
-        Expr::DIV(
+        Expr::Div(
             Box::new(left),
             Box::new(right),
             temp.len(),
@@ -156,15 +155,15 @@ fn parse_eq(input: &str) -> IResult<&str, Expr> {
     let (temp, _) = delimited(space0, tag("EQ"), space0)(input)?;
     let (temp, left) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     let (temp, right) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     Ok((
         temp,
-        Expr::EQ(
+        Expr::Eq(
             Box::new(left),
             Box::new(right),
             temp.len(),
@@ -177,15 +176,15 @@ fn parse_ne(input: &str) -> IResult<&str, Expr> {
     let (temp, _) = delimited(space0, tag("NE"), space0)(input)?;
     let (temp, left) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     let (temp, right) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     Ok((
         temp,
-        Expr::NE(
+        Expr::Ne(
             Box::new(left),
             Box::new(right),
             temp.len(),
@@ -198,15 +197,15 @@ fn parse_lt(input: &str) -> IResult<&str, Expr> {
     let (temp, _) = delimited(space0, tag("LT"), space0)(input)?;
     let (temp, left) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     let (temp, right) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     Ok((
         temp,
-        Expr::LT(
+        Expr::Lt(
             Box::new(left),
             Box::new(right),
             temp.len(),
@@ -219,15 +218,15 @@ fn parse_gt(input: &str) -> IResult<&str, Expr> {
     let (temp, _) = delimited(space0, tag("GT"), space0)(input)?;
     let (temp, left) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     let (temp, right) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     Ok((
         temp,
-        Expr::GT(
+        Expr::Gt(
             Box::new(left),
             Box::new(right),
             temp.len(),
@@ -240,15 +239,15 @@ fn parse_and(input: &str) -> IResult<&str, Expr> {
     let (temp, _) = delimited(space0, tag("AND"), space0)(input)?;
     let (temp, left) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     let (temp, right) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     Ok((
         temp,
-        Expr::AND(
+        Expr::And(
             Box::new(left),
             Box::new(right),
             temp.len(),
@@ -261,15 +260,15 @@ fn parse_or(input: &str) -> IResult<&str, Expr> {
     let (temp, _) = delimited(space0, tag("OR"), space0)(input)?;
     let (temp, left) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     let (temp, right) = parse_expr(temp).unwrap_or((
         temp,
-        Expr::ERROR("MissingOperand".to_string(), temp.len(), 0),
+        Expr::Error("MissingOperand".to_string(), temp.len(), 0),
     ));
     Ok((
         temp,
-        Expr::OR(
+        Expr::Or(
             Box::new(left),
             Box::new(right),
             temp.len(),
@@ -280,29 +279,29 @@ fn parse_or(input: &str) -> IResult<&str, Expr> {
 
 fn parse_xcor(input: &str) -> IResult<&str, Expr> {
     let (temp, _) = delimited(space0, tag("XCOR"), space0)(input)?;
-    Ok((temp, Expr::XCOR(temp.len(), input.len() - temp.len())))
+    Ok((temp, Expr::XCor(temp.len(), input.len() - temp.len())))
 }
 
 fn parse_ycor(input: &str) -> IResult<&str, Expr> {
     let (temp, _) = delimited(space0, tag("YCOR"), space0)(input)?;
-    Ok((temp, Expr::YCOR(temp.len(), input.len() - temp.len())))
+    Ok((temp, Expr::YCor(temp.len(), input.len() - temp.len())))
 }
 
 fn parse_heading(input: &str) -> IResult<&str, Expr> {
     let (temp, _) = delimited(space0, tag("HEADING"), space0)(input)?;
-    Ok((temp, Expr::HEADING(temp.len(), input.len() - temp.len())))
+    Ok((temp, Expr::Heading(temp.len(), input.len() - temp.len())))
 }
 
 fn parse_color(input: &str) -> IResult<&str, Expr> {
     let (temp, _) = delimited(space0, tag("COLOR"), space0)(input)?;
-    Ok((temp, Expr::COLOR(temp.len(), input.len() - temp.len())))
+    Ok((temp, Expr::Color(temp.len(), input.len() - temp.len())))
 }
 
 fn parts_err(input: &str) -> IResult<&str, Expr> {
     let (temp, _) = delimited(space0, is_not(" ["), space0)(input)?;
     Ok((
         temp,
-        Expr::ERROR(
+        Expr::Error(
             "UnexpectedExpr".to_string(),
             temp.len(),
             input.len() - temp.len(),

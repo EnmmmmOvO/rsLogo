@@ -1,4 +1,3 @@
-workspace = { members = [ "src/ast", "src/generation", "src/transpiler" ] }
 [package]
 name = "rslogo"
 version = "0.1.0"
@@ -7,9 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ast = { path = "src/ast" }
-generation = { path = "src/generation" }
 unsvg = "1.1.1"
 clap = { version = "4.4.4", features = ["derive"] }
 miette = { version = "7.2.0", features = ["fancy"] }
-transpiler = { path = "src/transpiler" }
+nom = "7.0.0"
+thiserror = "1.0.58"
+regex = "1.10.4"

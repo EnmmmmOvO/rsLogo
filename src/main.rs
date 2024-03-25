@@ -1,8 +1,12 @@
 use clap::Parser;
+use miette::{miette, Result};
+
+mod ast;
+mod generation;
+mod transpiler;
 
 use ast::parse_ast;
 use generation::code_generation;
-use miette::{miette, Result};
 use transpiler::transpiler_rust;
 
 /// A simple program to parse four arguments using clap.

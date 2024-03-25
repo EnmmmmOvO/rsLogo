@@ -1,6 +1,8 @@
-use crate::err::{match_err, TranspilerError};
-use crate::file::DrawMethod;
-use ast::structs::Expr;
+use crate::ast::structs::Expr;
+use crate::transpiler::{
+    err::{match_err, TranspilerError},
+    file::DrawMethod,
+};
 use std::collections::HashMap;
 
 pub enum Value {
@@ -16,8 +18,8 @@ pub fn transpiler_expr<'a>(
     method: &mut DrawMethod,
 ) -> Result<Value, TranspilerError<'a>> {
     match expr {
-        Expr::BOOLEAN(bool, ..) => Ok(Value::B(bool.to_string())),
-        Expr::FLOAT(num, ..) => {
+        Expr::Boolean(bool, ..) => Ok(Value::B(bool.to_string())),
+        Expr::Float(num, ..) => {
             let temp = num.to_string();
             if temp.contains('.') {
                 Ok(Value::F(temp))
@@ -25,7 +27,7 @@ pub fn transpiler_expr<'a>(
                 Ok(Value::F(format!("{}.0", temp)))
             }
         }
-        Expr::VAR(var, end, len) => match variable.get(var) {
+        Expr::Var(var, end, len) => match variable.get(var) {
             Some(true) => Ok(Value::B(var.to_string())),
             Some(false) => Ok(Value::F(var.to_string())),
             None => Err(match_err(
@@ -36,7 +38,7 @@ pub fn transpiler_expr<'a>(
                 *len,
             )),
         },
-        Expr::ADD(expr1, expr2, ..) => {
+        Expr::Add(expr1, expr2, ..) => {
             match (
                 transpiler_expr(expr1, line, sentence, variable, method)?,
                 transpiler_expr(expr2, line, sentence, variable, method)?,
@@ -68,7 +70,7 @@ pub fn transpiler_expr<'a>(
                 }
             }
         }
-        Expr::SUB(expr1, expr2, ..) => {
+        Expr::Sub(expr1, expr2, ..) => {
             match (
                 transpiler_expr(expr1, line, sentence, variable, method)?,
                 transpiler_expr(expr2, line, sentence, variable, method)?,
@@ -100,7 +102,7 @@ pub fn transpiler_expr<'a>(
                 }
             }
         }
-        Expr::MUL(expr1, expr2, ..) => {
+        Expr::Mul(expr1, expr2, ..) => {
             match (
                 transpiler_expr(expr1, line, sentence, variable, method)?,
                 transpiler_expr(expr2, line, sentence, variable, method)?,
@@ -132,7 +134,7 @@ pub fn transpiler_expr<'a>(
                 }
             }
         }
-        Expr::DIV(expr1, expr2, ..) => {
+        Expr::Div(expr1, expr2, ..) => {
             match (
                 transpiler_expr(expr1, line, sentence, variable, method)?,
                 transpiler_expr(expr2, line, sentence, variable, method)?,
@@ -164,7 +166,7 @@ pub fn transpiler_expr<'a>(
                 }
             }
         }
-        Expr::EQ(expr1, expr2, end, len) => {
+        Expr::Eq(expr1, expr2, end, len) => {
             match (
                 transpiler_expr(expr1, line, sentence, variable, method)?,
                 transpiler_expr(expr2, line, sentence, variable, method)?,
@@ -185,7 +187,7 @@ pub fn transpiler_expr<'a>(
                 )),
             }
         }
-        Expr::NE(expr1, expr2, end, len) => {
+        Expr::Ne(expr1, expr2, end, len) => {
             match (
                 transpiler_expr(expr1, line, sentence, variable, method)?,
                 transpiler_expr(expr2, line, sentence, variable, method)?,
@@ -206,7 +208,7 @@ pub fn transpiler_expr<'a>(
                 )),
             }
         }
-        Expr::LT(expr1, expr2, ..) => {
+        Expr::Lt(expr1, expr2, ..) => {
             match (
                 transpiler_expr(expr1, line, sentence, variable, method)?,
                 transpiler_expr(expr2, line, sentence, variable, method)?,
@@ -238,7 +240,7 @@ pub fn transpiler_expr<'a>(
                 }
             }
         }
-        Expr::GT(expr1, expr2, ..) => {
+        Expr::Gt(expr1, expr2, ..) => {
             match (
                 transpiler_expr(expr1, line, sentence, variable, method)?,
                 transpiler_expr(expr2, line, sentence, variable, method)?,
@@ -270,7 +272,7 @@ pub fn transpiler_expr<'a>(
                 }
             }
         }
-        Expr::AND(expr1, expr2, ..) => {
+        Expr::And(expr1, expr2, ..) => {
             match (
                 transpiler_expr(expr1, line, sentence, variable, method)?,
                 transpiler_expr(expr2, line, sentence, variable, method)?,
@@ -302,7 +304,7 @@ pub fn transpiler_expr<'a>(
                 }
             }
         }
-        Expr::OR(expr1, expr2, ..) => {
+        Expr::Or(expr1, expr2, ..) => {
             match (
                 transpiler_expr(expr1, line, sentence, variable, method)?,
                 transpiler_expr(expr2, line, sentence, variable, method)?,
@@ -334,19 +336,19 @@ pub fn transpiler_expr<'a>(
                 }
             }
         }
-        Expr::XCOR(..) => {
+        Expr::XCor(..) => {
             method.insert("x".to_string());
             Ok(Value::F("draw.x()".to_string()))
         }
-        Expr::YCOR(..) => {
+        Expr::YCor(..) => {
             method.insert("y".to_string());
             Ok(Value::F("draw.y()".to_string()))
         }
-        Expr::HEADING(..) => {
+        Expr::Heading(..) => {
             method.insert("direction".to_string());
             Ok(Value::F("draw.direction()".to_string()))
         }
-        Expr::COLOR(..) => {
+        Expr::Color(..) => {
             method.insert("color".to_string());
             Ok(Value::F("draw.color()".to_string()))
         }
@@ -373,23 +375,23 @@ pub fn check_formula(input: String) -> String {
 
 pub fn get_end_len(expr: &Expr) -> (usize, usize) {
     match expr {
-        Expr::FLOAT(.., end, len)
-        | Expr::VAR(.., end, len)
-        | Expr::ADD(.., end, len)
-        | Expr::SUB(.., end, len)
-        | Expr::MUL(.., end, len)
-        | Expr::DIV(.., end, len)
-        | Expr::XCOR(end, len)
-        | Expr::YCOR(end, len)
-        | Expr::HEADING(end, len)
-        | Expr::COLOR(end, len)
-        | Expr::EQ(.., end, len)
-        | Expr::NE(.., end, len)
-        | Expr::LT(.., end, len)
-        | Expr::GT(.., end, len)
-        | Expr::AND(.., end, len)
-        | Expr::OR(.., end, len)
-        | Expr::BOOLEAN(.., end, len) => (*end, *len),
+        Expr::Float(.., end, len)
+        | Expr::Var(.., end, len)
+        | Expr::Add(.., end, len)
+        | Expr::Sub(.., end, len)
+        | Expr::Mul(.., end, len)
+        | Expr::Div(.., end, len)
+        | Expr::XCor(end, len)
+        | Expr::YCor(end, len)
+        | Expr::Heading(end, len)
+        | Expr::Color(end, len)
+        | Expr::Eq(.., end, len)
+        | Expr::Ne(.., end, len)
+        | Expr::Lt(.., end, len)
+        | Expr::Gt(.., end, len)
+        | Expr::And(.., end, len)
+        | Expr::Or(.., end, len)
+        | Expr::Boolean(.., end, len) => (*end, *len),
         _ => unreachable!(),
     }
 }

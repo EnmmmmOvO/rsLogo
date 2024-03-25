@@ -1,20 +1,12 @@
 use std::collections::VecDeque;
 
-mod assign;
-mod decl;
-mod err;
-mod expr;
-mod stmt;
-pub mod structs;
-mod support;
-
-use decl::parse_decl;
-use err::ASTError;
-use err::{check_decl_err, check_stmt_err, match_err};
-use stmt::parse_stmt;
-use structs::DeclName;
-use structs::Function;
-use structs::{Decl, Stmt};
+use crate::ast::{
+    decl::parse_decl,
+    err::ASTError,
+    err::{check_decl_err, check_stmt_err, match_err},
+    stmt::parse_stmt,
+    structs::{Decl, DeclName, Function, Stmt},
+};
 
 fn struct_check(file: &[String]) -> Result<(), ASTError<'static>> {
     let mut if_while_list = vec![];
@@ -133,7 +125,7 @@ pub fn parse_ast(file: &[String]) -> Result<Function, ASTError<'static>> {
         }
 
         if trim_sentence.starts_with("//") {
-            local.front_mut().unwrap().push(Stmt::COMMENT(
+            local.front_mut().unwrap().push(Stmt::Comments(
                 sentence.trim().trim_start_matches("//").trim().to_string(),
                 idx + 1,
             ));
@@ -154,15 +146,15 @@ pub fn parse_ast(file: &[String]) -> Result<Function, ASTError<'static>> {
                 .expect("Expected a statement to modify in record");
 
             match stmt_to_modify {
-                Stmt::IF(expr, _, line) => {
-                    let modified_stmt = Stmt::IF(expr, block, line);
+                Stmt::If(expr, _, line) => {
+                    let modified_stmt = Stmt::If(expr, block, line);
                     local
                         .front_mut()
                         .expect("Expected a front block in local")
                         .push(modified_stmt);
                 }
-                Stmt::WHILE(expr, _, line) => {
-                    let modified_stmt = Stmt::WHILE(expr, block, line);
+                Stmt::While(expr, _, line) => {
+                    let modified_stmt = Stmt::While(expr, block, line);
                     local
                         .front_mut()
                         .expect("Expected a front block in local")
@@ -182,7 +174,7 @@ pub fn parse_ast(file: &[String]) -> Result<Function, ASTError<'static>> {
                 ));
             }
 
-            if let DeclName::STRING(name, end, len) = &*result.1.name {
+            if let DeclName::String(name, end, len) = &*result.1.name {
                 if res.check_name(name) {
                     return Err(match_err(
                         sentence.to_string(),
@@ -213,7 +205,7 @@ pub fn parse_ast(file: &[String]) -> Result<Function, ASTError<'static>> {
 
             let decl = func_record.take().expect("Expected a declaration");
 
-            if let DeclName::STRING(name, _, _) = &*decl.name {
+            if let DeclName::String(name, _, _) = &*decl.name {
                 res.insert(
                     name.to_string(),
                     decl.var,
@@ -224,22 +216,22 @@ pub fn parse_ast(file: &[String]) -> Result<Function, ASTError<'static>> {
             let mut result = parse_stmt(sentence).expect("Expected a block in local");
 
             match &mut result.1 {
-                Stmt::IF(.., line)
-                | Stmt::WHILE(.., line)
-                | Stmt::MAKE(.., line)
-                | Stmt::PENUP(line)
-                | Stmt::PENDOWN(line)
-                | Stmt::FORWARD(.., line)
-                | Stmt::BACK(.., line)
-                | Stmt::LEFT(.., line)
-                | Stmt::RIGHT(.., line)
-                | Stmt::SETPENCOLOR(.., line)
-                | Stmt::TURN(.., line)
-                | Stmt::SETHEADING(.., line)
-                | Stmt::SETX(.., line)
-                | Stmt::SETY(.., line)
-                | Stmt::ADDASSIGN(.., line)
-                | Stmt::FUNC(.., line) => *line = idx,
+                Stmt::If(.., line)
+                | Stmt::While(.., line)
+                | Stmt::Make(.., line)
+                | Stmt::PenUp(line)
+                | Stmt::PenDown(line)
+                | Stmt::Forward(.., line)
+                | Stmt::Back(.., line)
+                | Stmt::Left(.., line)
+                | Stmt::Right(.., line)
+                | Stmt::SetPenColor(.., line)
+                | Stmt::Turn(.., line)
+                | Stmt::SetHeading(.., line)
+                | Stmt::SetX(.., line)
+                | Stmt::SetY(.., line)
+                | Stmt::AddAssign(.., line)
+                | Stmt::Func(.., line) => *line = idx,
                 _ => (),
             }
 
