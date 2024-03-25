@@ -3,10 +3,7 @@ use thiserror::Error;
 
 #[derive(Error, Debug, Diagnostic)]
 #[error("{error}")]
-#[diagnostic(
-    code("Code Generation Error"),
-    help("{help}")
-)]
+#[diagnostic(code("Code Generation Error"), help("{help}"))]
 pub enum GenerationError<'a> {
     UnexpectedNumberType {
         #[source_code]
@@ -98,7 +95,13 @@ pub enum GenerationError<'a> {
     },
 }
 
-pub fn match_err<'a>(src: String, line: usize, err: String, end: usize, len: usize) -> GenerationError<'a> {
+pub fn match_err<'a>(
+    src: String,
+    line: usize,
+    err: String,
+    end: usize,
+    len: usize,
+) -> GenerationError<'a> {
     let start = src.len() - end - len;
     match err.as_str() {
         "UnexpectedNumberType" => GenerationError::UnexpectedNumberType {
@@ -151,14 +154,15 @@ pub fn match_err<'a>(src: String, line: usize, err: String, end: usize, len: usi
             help: "Use `MAKE` to define the variable before using it.",
             error: format!("Undefined variable error (Ln {line}, Col {})", start + 1),
         },
-        "UnDefinedVariableValue" => {
-            GenerationError::UnDefinedVariableValue {
-                src,
-                bad_bit: (start, len).into(),
-                help: "This value may be defined in the arguments of `TO`, but its specific value \
+        "UnDefinedVariableValue" => GenerationError::UnDefinedVariableValue {
+            src,
+            bad_bit: (start, len).into(),
+            help: "This value may be defined in the arguments of `TO`, but its specific value \
                 has not been defined yet and cannot be used.",
-                error: format!("Undefined variable value error (Ln {line}, Col {})", start + 1),
-            }
+            error: format!(
+                "Undefined variable value error (Ln {line}, Col {})",
+                start + 1
+            ),
         },
         "UnDefinedFunction" => GenerationError::UnDefinedFunction {
             src,

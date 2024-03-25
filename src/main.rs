@@ -1,10 +1,9 @@
 use clap::Parser;
 
-use miette::{miette, Result};
 use ast::parse_ast;
 use generation::code_generation;
+use miette::{miette, Result};
 use transpiler::transpiler_rust;
-
 
 /// A simple program to parse four arguments using clap.
 #[derive(Parser)]
@@ -32,13 +31,13 @@ fn main() -> Result<()> {
     let width = args.width;
 
     let file = match std::fs::read_to_string(file_path) {
-        Ok(file) => file.lines().map(|x| x.to_string()).collect(),
+        Ok(file) => file.lines().map(|x| x.to_string()).collect::<Vec<String>>(),
         Err(e) => return Err(miette!(e)),
     };
 
     let ast = parse_ast(&file)?;
 
-    match image_path.extension().map(|s| s.to_str()).flatten() {
+    match image_path.extension().and_then(|s| s.to_str()) {
         Some("svg") => {
             let image = code_generation(ast, &file, width, height)?;
 
@@ -56,12 +55,12 @@ fn main() -> Result<()> {
             }
         }
         None => {
-            if image_path.is_dir() || image_path.display().to_string().contains("/") {
+            if image_path.is_dir() || image_path.display().to_string().contains('/') {
                 return Err(miette!("Rust transpiler does not support directories"));
             }
             transpiler_rust(&image_path, ast, &file, width, height)?
-        },
-        _ => return Err(miette!("File extension not supported"))
+        }
+        _ => return Err(miette!("File extension not supported")),
     }
 
     Ok(())

@@ -1,13 +1,10 @@
+use crate::structs::{Assign, Decl, DeclName, Expr, Stmt};
 use miette::{Diagnostic, SourceSpan};
 use thiserror::Error;
-use crate::structs::{Assign, Decl, DeclName, Expr, Stmt};
 
 #[derive(Error, Debug, Diagnostic)]
 #[error("{error}")]
-#[diagnostic(
-    code("Compile Error"),
-    help("{help}")
-)]
+#[diagnostic(code("Compile Error"), help("{help}"))]
 pub enum ASTError<'a> {
     UnexpectedExtraOperand {
         #[source_code]
@@ -123,7 +120,13 @@ pub enum ASTError<'a> {
     },
 }
 
-pub fn match_err<'a>(src: String, line: usize, err: String, end: usize, len: usize) -> ASTError<'a> {
+pub fn match_err<'a>(
+    src: String,
+    line: usize,
+    err: String,
+    end: usize,
+    len: usize,
+) -> ASTError<'a> {
     let start = src.len() - end - len;
     match err.as_str() {
         "UnexpectedExtraOperand" => ASTError::UnexpectedExtraOperand {
@@ -217,9 +220,8 @@ pub fn match_err<'a>(src: String, line: usize, err: String, end: usize, len: usi
 }
 
 pub fn check_decl_err(input: &Decl) -> Option<(String, usize, usize)> {
-    match &*input.name {
-        DeclName::ERROR(s, end, len) => return Some((s.to_string(), *end, *len)),
-        _ => {},
+    if let DeclName::ERROR(s, end, len) = &*input.name {
+        return Some((s.to_string(), *end, *len));
     }
 
     for var in input.var.iter() {
@@ -239,34 +241,34 @@ pub fn check_decl_name_err(input: &DeclName) -> Option<(String, usize, usize)> {
 
 pub fn check_stmt_err(input: &Stmt) -> Option<(String, usize, usize)> {
     match input {
-        Stmt::IF(expr, ..) | Stmt::WHILE(expr, ..) =>
-            check_expr_err(expr.as_ref()),
-        Stmt::MAKE(expr1, expr2, ..) |
-        Stmt::ADDASSIGN(expr1, expr2, ..) => {
+        Stmt::IF(expr, ..) | Stmt::WHILE(expr, ..) => check_expr_err(expr.as_ref()),
+        Stmt::MAKE(expr1, expr2, ..) | Stmt::ADDASSIGN(expr1, expr2, ..) => {
             if let Some(temp) = check_assign_err(expr1.as_ref()) {
                 return Some(temp);
             }
             check_expr_err(expr2.as_ref())
-        },
-        Stmt::FORWARD(expr, ..) |
-        Stmt::BACK(expr, ..) |
-        Stmt::LEFT(expr, ..) |
-        Stmt::RIGHT(expr, ..) |
-        Stmt::SETPENCOLOR(expr, ..) |
-        Stmt::TURN(expr, ..) |
-        Stmt::SETHEADING(expr, ..) |
-        Stmt::SETX(expr, ..) |
-        Stmt::SETY(expr, ..) => check_expr_err(expr.as_ref()),
+        }
+        Stmt::FORWARD(expr, ..)
+        | Stmt::BACK(expr, ..)
+        | Stmt::LEFT(expr, ..)
+        | Stmt::RIGHT(expr, ..)
+        | Stmt::SETPENCOLOR(expr, ..)
+        | Stmt::TURN(expr, ..)
+        | Stmt::SETHEADING(expr, ..)
+        | Stmt::SETX(expr, ..)
+        | Stmt::SETY(expr, ..) => check_expr_err(expr.as_ref()),
         Stmt::FUNC(name, assign, ..) => {
             if let Some(temp) = check_decl_name_err(name.as_ref()) {
                 return Some(temp);
             }
 
             for var in assign.iter() {
-                return check_expr_err(var.as_ref());
+                if let Some(temp) = check_expr_err(var.as_ref()) {
+                    return Some(temp);
+                }
             }
             None
-        },
+        }
         _ => None,
     }
 }
@@ -280,23 +282,23 @@ pub fn check_assign_err(input: &Assign) -> Option<(String, usize, usize)> {
 
 pub fn check_expr_err(input: &Expr) -> Option<(String, usize, usize)> {
     match input {
-        Expr::ADD(a, b, ..) |
-        Expr::SUB(a, b, ..) |
-        Expr::MUL(a, b, ..) |
-        Expr::DIV(a, b, ..) |
-        Expr::EQ(a, b, ..) |
-        Expr::NE(a, b, ..) |
-        Expr::LT(a, b, ..) |
-        Expr::GT(a, b, ..) |
-        Expr::AND(a, b, ..) |
-        Expr::OR(a, b, ..) => {
+        Expr::ADD(a, b, ..)
+        | Expr::SUB(a, b, ..)
+        | Expr::MUL(a, b, ..)
+        | Expr::DIV(a, b, ..)
+        | Expr::EQ(a, b, ..)
+        | Expr::NE(a, b, ..)
+        | Expr::LT(a, b, ..)
+        | Expr::GT(a, b, ..)
+        | Expr::AND(a, b, ..)
+        | Expr::OR(a, b, ..) => {
             let (a, b) = (a.as_ref(), b.as_ref());
             match (a, b) {
                 (Expr::ERROR(s, end, len), _) => Some((s.to_string(), *end, *len)),
                 (_, Expr::ERROR(s, end, len)) => Some((s.to_string(), *end, *len)),
                 _ => None,
             }
-        },
+        }
         Expr::ERROR(s, end, len) => Some((s.to_string(), *end, *len)),
         _ => None,
     }

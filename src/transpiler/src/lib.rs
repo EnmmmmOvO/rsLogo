@@ -1,22 +1,22 @@
+mod err;
+mod expr;
 mod file;
 mod func;
 mod stmt;
-mod expr;
-mod err;
 
-use std::path::PathBuf;
+use crate::file::export_file;
+use crate::func::transpile_func;
 use ast::structs::Function;
 use file::DrawMethod;
 use miette::Result;
-use crate::file::export_file;
-use crate::func::{transpile_func};
+use std::path::PathBuf;
 
-pub fn transpiler_rust<'a>(
-    path: &'a PathBuf,
+pub fn transpiler_rust(
+    path: &PathBuf,
     ast: Function,
-    file: &'a Vec<String>,
+    file: &[String],
     width: u32,
-    height: u32
+    height: u32,
 ) -> Result<()> {
     let mut method = DrawMethod::new();
     let mut result = vec![
@@ -25,7 +25,14 @@ pub fn transpiler_rust<'a>(
     ];
 
     for (name, func) in ast.get_all() {
-        result.push(transpile_func(&func.args, &func.stmt_list, name, file, &mut method, &ast)?);
+        result.push(transpile_func(
+            &func.args,
+            &func.stmt_list,
+            name,
+            file,
+            &mut method,
+            &ast,
+        )?);
     }
 
     export_file(path, &method, width, height, &result)?;

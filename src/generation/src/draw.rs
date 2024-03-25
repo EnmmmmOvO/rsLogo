@@ -17,7 +17,7 @@ impl<'a> Draw<'a> {
             draw: false,
             color: COLORS[7],
             direction: 0,
-            image
+            image,
         }
     }
 
@@ -58,7 +58,10 @@ impl<'a> Draw<'a> {
             self.x = temp.0;
             self.y = temp.1;
         } else {
-            match self.image.draw_simple_line(self.x, self.y, dir, distance, self.color) {
+            match self
+                .image
+                .draw_simple_line(self.x, self.y, dir, distance, self.color)
+            {
                 Ok(result) => {
                     self.x = result.0;
                     self.y = result.1;
@@ -88,4 +91,3 @@ impl<'a> Draw<'a> {
         self.y = y;
     }
 }
-
